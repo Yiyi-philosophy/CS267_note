@@ -15,16 +15,23 @@ Note:
 4. Different between **Concurrency** & **Parallelism** : logical & actual
 5. **Goal**: Exa-flop = 10^18 flop/s
 6. Top 500 Project
-
     1. Yardstick: Linpack -> Solve $Ax=b$
 7. Performance history and Protection
 8. **Gordon Bell Prize**: Application Performance 
 9. **Five paradigm**: Theory & Experiment & Simulation & Data Analysis & Machine Learning
 10. Analytics & Simulation
+<<<<<<< HEAD
     - **7 Giants of Data:** Basic statics & Generalized N-Body & Graph-theory & Linear algebra & Optimizations & Integrations & Alignment
     - **7 Dwarfs of Simulation**:  Monte Carlo method & Particle methods & Unstructured meshes & Dense Linear Algebra & Sparse Linear Algebra &  Spectral methods &  Structured Meshes   
 11. Limitation of HPC: 
     - Space limitation: Single Chip : $r<c/10^{12}$
+=======
+	- **7 Giants of Data:** Basic statics & Generalized N-Body & Graph-theory & Linear algebra & Optimizations & Integrations & Alignment
+	- **7 Dwarfs of Simulation**:  Monte Carlo method & Particle methods & Unstructured meshes & Dense Linear Algebra & Sparse Linear Algebra &  Spectral methods &  Structured Meshes.
+11. Limitation of HPC: 
+    - Space limitation:Single Chip :  
+    	- $ r < c / 10^{12} $
+>>>>>>> 101f163c64d9b700aabe5d8ce686773951d346e5
     - Heat limitation: $Power \propto  V^2fC$
 12. Reinterpreted Moore's law
 
