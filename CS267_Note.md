@@ -24,7 +24,12 @@ Note:
     - **7 Giants of Data:** Basic statics & Generalized N-Body & Graph-theory & Linear algebra & Optimizations & Integrations & Alignment
     - **7 Dwarfs of Simulation**:  Monte Carlo method & Particle methods & Unstructured meshes & Dense Linear Algebra & Sparse Linear Algebra &  Spectral methods &  Structured Meshes   
 11. Limitation of HPC: 
-    - Space limitation: Single Chip : $r<c/10^{12}$
+    - Space limitation
+	  - Single Chip : $r<c/10^{12}$
+	- **7 Giants of Data:** Basic statics & Generalized N-Body & Graph-theory & Linear algebra & Optimizations & Integrations & Alignment
+	- **7 Dwarfs of Simulation**:  Monte Carlo method & Particle methods & Unstructured meshes & Dense Linear Algebra & Sparse Linear Algebra &  Spectral methods &  Structured Meshes.
+11. Limitation of HPC: 
+    - Space limitation: Single Chip :  $r<c/10^{12}$
     - Heat limitation: $Power \propto  V^2fC$
 12. Reinterpreted Moore's law
 
@@ -74,6 +79,8 @@ Note:
   - Minimize Pointer Updates
 
 ---
+
+## P3
 
 
 
