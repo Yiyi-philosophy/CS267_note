@@ -1,0 +1,2579 @@
+welcome everyone to cs267 uh this is applications of parallel
+uh this is applications of parallel computers hopefully you're all in this
+computers hopefully you're all in this the right zoom room and um we're gonna
+the right zoom room and um we're gonna be
+be i'm gonna give you an overview today
+i'm gonna give you an overview today what we'll be talking about this in this
+what we'll be talking about this in this course
+course and talk a little bit about what
+and talk a little bit about what parallel computers are why we use them
+parallel computers are why we use them what kinds of applications are used for
+what kinds of applications are used for and things like that and at the end
+and things like that and at the end i will introduce some of the other
+i will introduce some of the other people involved in the course and also
+people involved in the course and also talk about some of the class
+talk about some of the class logistics if you have any questions
+logistics if you have any questions along the way
+along the way feel free to type them into the chat
+feel free to type them into the chat both of my co-instructors are here as
+both of my co-instructors are here as well as three gsi's so
+well as three gsi's so hopefully somebody will can answer the
+hopefully somebody will can answer the questions and if not somebody will
+questions and if not somebody will interrupt me
+interrupt me and i will try to answer the questions
+
+so let's start with the question of what's a parallel computer
+what's a parallel computer and the picture here should give you a
+and the picture here should give you a hint uh a parallel computer is really
+hint uh a parallel computer is really all about how things are connected
+all about how things are connected together
+together the network that connects the parallel
+the network that connects the parallel computer together and they can be
+computer together and they can be connected in a number of different ways
+connected in a number of different ways we're going to take separate processors
+we're going to take separate processors and connect them together to make a
+and connect them together to make a parallel computer
+parallel computer parallel computing is really all about
+parallel computing is really all about the need for speed it's about
+the need for speed it's about trying to solve a problem faster by
+trying to solve a problem faster by using
+more than one processor that is by using parallelism and parallel computers
+parallelism and parallel computers so a couple of really simple examples
+so a couple of really simple examples just to get you
+just to get you thinking about these problems let's say
+thinking about these problems let's say that we
+that we want to for some reason compute the
+want to for some reason compute the prime factors of a billion different
+prime factors of a billion different numbers
+numbers now one way we could do this let's say
+now one way we could do this let's say that we have a million processors
+that we have a million processors is just to get give each one of them a
+is just to get give each one of them a thousand numbers and have them
+thousand numbers and have them do this completely independently that
+do this completely independently that would be a nice parallel algorithm
+would be a nice parallel algorithm it may it may have some issues in terms
+it may it may have some issues in terms of how long it takes each of them they
+of how long it takes each of them they may not have the same amount of work so
+may not have the same amount of work so there might be some load imbalance
+there might be some load imbalance might be a little bit inefficient
+might be a little bit inefficient because there might be some work that
+because there might be some work that they could have shared
+they could have shared between them but that gives you an idea
+between them but that gives you an idea of a simple parallel problem
+of a simple parallel problem is a really big problem that we want to
+is a really big problem that we want to solve on a really large number of
+solve on a really large number of processors
+processors by dividing up the work now something
+by dividing up the work now something that's a little bit less trivial
+that's a little bit less trivial is and we'll talk a lot more about these
+is and we'll talk a lot more about these kinds of algorithms later in the
+kinds of algorithms later in the semester
+semester let's say that we add want to add up n
+let's say that we add want to add up n numbers
+numbers if we do this on a traditional serial
+if we do this on a traditional serial computer
+computer it's going to take time o of n we're
+it's going to take time o of n we're just going to add up one
+just going to add up one number at a time so there's n minus 1
+number at a time so there's n minus 1 steps for those additions
+steps for those additions now in parallel what we can do is we can
+now in parallel what we can do is we can do that we can add up
+do that we can add up different pairs of numbers in parallel
+different pairs of numbers in parallel and
+and so this first step would involve four
+so this first step would involve four processors as shown here with the eight
+processors as shown here with the eight different numbers and then two
+different numbers and then two processors to add up the next
+processors to add up the next the result of those and so on until we
+the result of those and so on until we get a single answer
+get a single answer and so the parallel time in this case on
+and so the parallel time in this case on an ideal machine
+an ideal machine with an unbounded number of processors
+with an unbounded number of processors or in this case
+or in this case we actually need order n processors is
+we actually need order n processors is um is going to be o of log n and so
+um is going to be o of log n and so that's an
+that's an example of a slightly non-trivial
+example of a slightly non-trivial parallel algorithm
+parallel algorithm just to give you a sense of kind of the
+just to give you a sense of kind of the two extremes a really
+two extremes a really embarrassingly parallel problem as we
+embarrassingly parallel problem as we will call the first one or at least the
+will call the first one or at least the way we are approaching it
+way we are approaching it and then something that has some
+and then something that has some important dependencies in terms of how
+important dependencies in terms of how we're going to compute them
+we're going to compute them and this this algorithm is taking
+and this this algorithm is taking advantage of the fact that plus is
+advantage of the fact that plus is associative at least on the integers
+associative at least on the integers so we can add them up in either order
+so we can add them up in either order and get the same answer
+
+now there's a famous quote that's due to seymour cray
+seymour cray one of the founders of parallel
+one of the founders of parallel computing and of course the founder of
+computing and of course the founder of cray
+uh various versions of the cray company which is now part of
+which is now part of hpe um and the quote is if you are
+hpe um and the quote is if you are plowing a field which would you rather
+plowing a field which would you rather use
+use two strong oxen or a thousand twenty
+two strong oxen or a thousand twenty four chickens
+four chickens and um i always find this quote a little
+and um i always find this quote a little bit odd because i'm never quite sure
+bit odd because i'm never quite sure whether i'd prefer the oxen or the
+whether i'd prefer the oxen or the chickens
+chickens but as we'll see later when we talk more
+but as we'll see later when we talk more about the details
+about the details of what these processors look like we're
+of what these processors look like we're really going to want a very large number
+really going to want a very large number of fairly lightweight processors and
+of fairly lightweight processors and that's really um
+that's really um and he was really getting at the idea
+and he was really getting at the idea that you want massive amounts of
+that you want massive amounts of parallelism and can get more work done
+parallelism and can get more work done that way
+that way so a little bit more concretely although
+so a little bit more concretely although still a kind of a cartoon picture of
+still a kind of a cartoon picture of what parallel computers look like
+what parallel computers look like we'll really be talking about three
+we'll really be talking about three basic types of computers in the class
+basic types of computers in the class there'll be some variations certainly
+there'll be some variations certainly that we will we'll talk about as well
+that we will we'll talk about as well the first one is a shared memory
+the first one is a shared memory multiprocessor also called an
+multiprocessor also called an smp where all of the processors are
+smp where all of the processors are connected to a single memory
+connected to a single memory um a high performance computer or
+um a high performance computer or distributed memory multiprocessor
+distributed memory multiprocessor which is the second one where you have a
+which is the second one where you have a bunch of separate processors
+bunch of separate processors and their own memories then connected to
+and their own memories then connected to each other through a network
+each other through a network and the third one is what we'll call a
+and the third one is what we'll call a cmd machine or single instruction
+cmd machine or single instruction multiple data machine
+multiple data machine in which case we have lots of functional
+in which case we have lots of functional units lots of arithmetic units that can
+units lots of arithmetic units that can do things in parallel
+do things in parallel but really only one processor kind of
+but really only one processor kind of logical processor
+logical processor or one program counter so you can think
+or one program counter so you can think of this as if all the processors are
+of this as if all the processors are running
+running identical the the same program at
+identical the the same program at exactly the same
+exactly the same step and they're issuing the same
+step and they're issuing the same instruction and so this would be a cmd
+instruction and so this would be a cmd multiprocessor so a little bit more
+multiprocessor so a little bit more detail
+detail a shared memory multiprocessor or smp
+a shared memory multiprocessor or smp which technically by the way smp stands
+which technically by the way smp stands for symmetric multiprocessor
+for symmetric multiprocessor because they're all of the processors
+because they're all of the processors are typically the same in this case
+are typically the same in this case are connected to a single shared memory
+are connected to a single shared memory system what we will see and we'll talk
+system what we will see and we'll talk about this as early as next week that
+about this as early as next week that each processor may have its own cache
+each processor may have its own cache memory
+its own local fast memory and but they may
+may share the slower say dram memory or
+share the slower say dram memory or other types of memory
+other types of memory and they can all read and write to that
+and they can all read and write to that memory
+memory now over the last uh
+now over the last uh 10 years or so we've seen a lot more or
+10 years or so we've seen a lot more or 15 years we've seen
+15 years we've seen a lot of multi-processors these shared
+a lot of multi-processors these shared memory multi-processors that exist on a
+memory multi-processors that exist on a single chip
+single chip and these are called multi-core
+and these are called multi-core processors so a multi-core processor
+processors so a multi-core processor really is an example of a shared memory
+really is an example of a shared memory processor it's just that they happen to
+processor it's just that they happen to be on a single chip
+be on a single chip and we're going to talk a little bit
+and we're going to talk a little bit later today about why
+later today about why we're building why processor vendors are
+we're building why processor vendors are building
+building processors that have processor chips
+processors that have processor chips that have multiple cores on them
+that have multiple cores on them what what used to be called processors
+what what used to be called processors by the way this is a
+by the way this is a kind of move by the marketing agency
+kind of move by the marketing agency because they wanted to
+because they wanted to continue telling people that their
+continue telling people that their processors are getting faster
+processors are getting faster so instead of calling each individual
+so instead of calling each individual processor processor they called it a
+processor processor they called it a core
+core and then they call the chip that has
+and then they call the chip that has multiple cores a
+multiple cores a multi-core processor making it sound
+multi-core processor making it sound like the whole processor is faster
+like the whole processor is faster now the distributed memory case in a
+now the distributed memory case in a distributed memory multiprocessor as i
+distributed memory multiprocessor as i said
+said each processor has its own memory and it
+each processor has its own memory and it will
+will communicate with the other processors in
+communicate with the other processors in order to solve one of these problems
+order to solve one of these problems such as trying to figure out how to add
+such as trying to figure out how to add up these numbers
+up these numbers by doing some amount of work locally and
+by doing some amount of work locally and then communicating by messages of some
+then communicating by messages of some kind through the network
+kind through the network these this kind of a computer is also
+these this kind of a computer is also called a cluster and it's also typically
+called a cluster and it's also typically what we mean when we talk about a high
+what we mean when we talk about a high performance computer an hpc
+performance computer an hpc system hpc systems will tend to have
+system hpc systems will tend to have hundreds or even thousands
+hundreds or even thousands of processors or processing nodes each
+of processors or processing nodes each one of these by the way inside can also
+one of these by the way inside can also be a multi-core chip
+be a multi-core chip or even a what we'll call a multi-socket
+or even a what we'll call a multi-socket chip that means it has
+chip that means it has multiple processor chips inside of each
+multiple processor chips inside of each one of the nodes
+one of the nodes but at this level we'll think of each
+but at this level we'll think of each one of these as being
+one of these as being a node that communicates through some
+a node that communicates through some kind of communication
+
+network and the last kind is our cindy
+and the last kind is our cindy multiprocessor
+multiprocessor as i said this one has these independent
+as i said this one has these independent functional units
+functional units we may think of them as processors but
+we may think of them as processors but they really don't operate independently
+they really don't operate independently and these come up a lot on even single
+and these come up a lot on even single traditional processors like an x86
+traditional processors like an x86 processor today it will have 70
+processor today it will have 70 instructions so it has a little tiny
+instructions so it has a little tiny parallel processor inside of it
+parallel processor inside of it which is say two or eight way maybe a
+which is say two or eight way maybe a little bit higher but
+little bit higher but a small level of cindy parallelism
+a small level of cindy parallelism inside of that single processor chip
+inside of that single processor chip and the graphics processing units then
+and the graphics processing units then are another example that have these
+are another example that have these inside of the warps
+inside of the warps that will be operating on a a set of
+that will be operating on a a set of items and data
+items and data a data item such as an array of values
+a data item such as an array of values and operate on all of those values in
+and operate on all of those values in parallel
+
+so what's not a parallel computer and that's partly to let you know what this
+that's partly to let you know what this course is not going to really be about
+course is not going to really be about well first of all it's not really about
+well first of all it's not really about building things like
+building things like web tools that are using concurrency
+web tools that are using concurrency between say the thread
+between say the thread that is interacting with my screen and
+that is interacting with my screen and the thread that is doing some updates on
+the thread that is doing some updates on an excel spreadsheet or
+an excel spreadsheet or doing updates and running zoom at the
+doing updates and running zoom at the same time that we're running
+same time that we're running uh powerpoint or things like that so
+uh powerpoint or things like that so what's the difference between
+what's the difference between concurrency and parallelism
+concurrency and parallelism concurrency means that we have multiple
+concurrency means that we have multiple things that are going on
+things that are going on and that's the the picture here at the
+and that's the the picture here at the top that shows these different
+top that shows these different tasks that are that may be happening but
+tasks that are that may be happening but they
+they but only one of them may be happening
+but only one of them may be happening actually at a given point in time
+actually at a given point in time and the whereas parallelism has the case
+and the whereas parallelism has the case where the multiple tasks are actually
+where the multiple tasks are actually executing in parallel
+executing in parallel and in the bottom picture we see all of
+and in the bottom picture we see all of these overlapping so time is running
+these overlapping so time is running across the x-axis here
+across the x-axis here and we have all of the uh the in the
+and we have all of the uh the in the parallel execution it also is concurrent
+parallel execution it also is concurrent but in this case it has true parallelism
+but in this case it has true parallelism because the tasks are actually executing
+because the tasks are actually executing together
+
+so we're not really going to be talking about that kind of concurrent
+about that kind of concurrent programming we're really talking about
+programming we're really talking about parallelism for the standpoint
+parallelism for the standpoint of going back to that first picture
+of going back to that first picture really from the the standpoint of
+really from the the standpoint of performance how do we get more
+performance how do we get more performance
+performance by using parallelism so another example
+by using parallelism so another example of a system
+of a system systems that we use a lot today are
+systems that we use a lot today are distributed systems
+distributed systems these have distribution that's inherent
+these have distribution that's inherent in the problem
+in the problem so probably the oldest example of this
+so probably the oldest example of this would be something like
+would be something like an automatic teller machine an atm and a
+an automatic teller machine an atm and a banking system
+banking system where you have some server someplace
+where you have some server someplace that's keeping track of
+that's keeping track of your bank balance and everybody else's
+your bank balance and everybody else's bank balance and need each one of the
+bank balance and need each one of the atm machines you have a client
+atm machines you have a client that's sending requests to the server
+that's sending requests to the server saying i'd like to withdraw some money
+saying i'd like to withdraw some money or deposit some money
+or deposit some money and that's responding back to the the
+and that's responding back to the the remote
+remote client device and so in both this case
+client device and so in both this case and in the parallel distributed memory
+and in the parallel distributed memory multiprocessor case we do have things
+multiprocessor case we do have things that are distributed
+that are distributed but they're distributed in a very
+but they're distributed in a very different way in a different scale for
+different way in a different scale for different purposes
+different purposes so this distributed system here with the
+so this distributed system here with the client and the server
+client and the server is distributed because it's inherently a
+is distributed because it's inherently a problem where
+problem where people don't all want to drive to one
+people don't all want to drive to one bank in order to get access to their
+bank in order to get access to their bank account
+bank account and so you physically distributed the
+and so you physically distributed the the computing system if you will
+the computing system if you will across this network of somewhat loosely
+across this network of somewhat loosely coupled
+coupled clients and servers whereas a parallel
+clients and servers whereas a parallel computer
+computer it may use distributed memory but it's
+it may use distributed memory but it's not really a distributed system in this
+not really a distributed system in this sense
+sense and these have quite different
+and these have quite different underlying assumptions such as things
+underlying assumptions such as things like
+like whether we can assume that the network
+whether we can assume that the network becomes disconnected or in
+becomes disconnected or in the case of a parallel computer we will
+the case of a parallel computer we will assume that all of the processors are
+assume that all of the processors are going to be connected all the time to
+going to be connected all the time to each other now we can use parallelism
+each other now we can use parallelism inside
+inside of this server for example and then we
+of this server for example and then we would really have a distributed memory
+would really have a distributed memory computer or a cluster inside of the
+computer or a cluster inside of the server we would be doing that to
+server we would be doing that to improve the performance of the overall
+improve the performance of the overall system though not because it's
+system though not because it's necessarily required that the server be
+necessarily required that the server be parallel from any
+parallel from any standpoint that we we need to have it at
+standpoint that we we need to have it at different locations
+different locations and typically our distributed memory
+and typically our distributed memory parallel computers
+parallel computers are going to live inside a single
+are going to live inside a single machine room whereas our distributed
+machine room whereas our distributed systems are going to live in a much
+systems are going to live in a much wider area
+
+so the the fastest computers we've used in science for a long time have been
+in science for a long time have been parallel computers
+parallel computers and there's a website that you can look
+and there's a website that you can look at to see what some of the fastest
+at to see what some of the fastest computers in the world are
+computers in the world are it's called the top 500 list or top
+it's called the top 500 list or top 500.org
+500.org and this um the computer that you're
+and this um the computer that you're going to be using for all of the
+going to be using for all of the homework assignments in this class is
+homework assignments in this class is called corey it's named after gertrude
+called corey it's named after gertrude corey who's the first american woman to
+corey who's the first american woman to win the nobel
+win the nobel prize and um it has over
+prize and um it has over 680 000 processor cores so you can think
+680 000 processor cores so you can think of each of those as an individual
+of each of those as an individual processor
+processor although 68 of them and that's why
+although 68 of them and that's why you'll you get the six
+you'll you get the six six hundred and eighty thousand sixty
+six hundred and eighty thousand sixty eight of them are going to be on a
+eight of them are going to be on a single chip so these are
+single chip so these are multi-core or what sometimes people call
+multi-core or what sometimes people call many core chips
+many core chips it's about a thirty petaflop peak
+it's about a thirty petaflop peak machine a pedo flop
+machine a pedo flop is 10 to the 15th math operations per
+is 10 to the 15th math operations per second
+second and we take problems such as climate
+and we take problems such as climate modeling
+modeling and we map it onto this parallel machine
+and we map it onto this parallel machine or a piece of the peril machine because
+or a piece of the peril machine because we
+we fortunately you can all use it at the
+fortunately you can all use it at the same time you'll each be using different
+same time you'll each be using different nodes
+nodes of the the computer while you're logged
+of the the computer while you're logged into it and running your jobs
+into it and running your jobs but if you're looking at something like
+but if you're looking at something like trying to run a climate simulation
+trying to run a climate simulation we can take the globe divide it up into
+we can take the globe divide it up into these little pieces
+these little pieces and each processor will be working on
+and each processor will be working on one of those pieces or a set of those
+one of those pieces or a set of those pieces
+pieces and then they'll have to communicate
+and then they'll have to communicate with one another in order to
+with one another in order to do something like a climate model
+do something like a climate model because if the temperature increases in
+because if the temperature increases in california
+california then it may increase in nevada you can't
+then it may increase in nevada you can't completely independently simulate the
+completely independently simulate the climate and so
+climate and so that's where the communication will come
+that's where the communication will come up
+
+and um so the um we'll talk a little bit more about how
+we'll talk a little bit more about how big these things are but they're
+big these things are but they're they're pretty tiny on these these chips
+they're pretty tiny on these these chips and i will give you a show you a picture
+and i will give you a show you a picture a little bit later of what
+a little bit later of what what they look like so as i said some of
+what they look like so as i said some of the world's fastest
+the world's fastest computers are on this list called the
+computers are on this list called the top 500 list
+top 500 list and the next thing i'm going to talk
+and the next thing i'm going to talk about here is really what some of these
+about here is really what some of these really fast computers look like
+really fast computers look like not every computer in the world a fast
+not every computer in the world a fast computer is necessarily on the list
+computer is necessarily on the list you have to be willing to run a
+you have to be willing to run a benchmark and
+benchmark and willing to post the information about
+willing to post the information about your computer on the
+your computer on the on the the internet and so
+on the the internet and so the top 500 are selected by a committee
+the top 500 are selected by a committee that are that that allow people to just
+that are that that allow people to just run this one benchmark and i'll tell you
+run this one benchmark and i'll tell you what that is
+what that is and then they just take the top the
+and then they just take the top the fastest five entries from everybody it's
+fastest five entries from everybody it's not really very subjective other than
+not really very subjective other than making sure that people have actually
+making sure that people have actually run the benchmark
+run the benchmark and things like that so when we talk
+and things like that so when we talk about these super computers
+about these super computers we tend to talk about them in terms of
+we tend to talk about them in terms of the floating point rate of the machine
+the floating point rate of the machine so a floating point operation we often
+so a floating point operation we often call a flop
+call a flop for floating point operation and
+for floating point operation and typically we're going to
+typically we're going to refer to a double precision floating
+refer to a double precision floating point operation
+point operation that means a 64-bit uh representation of
+that means a 64-bit uh representation of a real number
+a real number approximate representation of a real
+approximate representation of a real number that's in the
+number that's in the in the hardware and flops per second
+in the hardware and flops per second is going to be the number of floating
+is going to be the number of floating point operations that a computer can do
+point operations that a computer can do per second or the rate at which it's
+per second or the rate at which it's doing these floating point operations
+doing these floating point operations we can we get a little bit sloppy
+we can we get a little bit sloppy sometimes and we'll leave out the slash
+sometimes and we'll leave out the slash some people just refer to flops and
+some people just refer to flops and there they mean the rate so you have to
+there they mean the rate so you have to look at the context to see whether
+look at the context to see whether somebody's really
+somebody's really referring to the number for example the
+referring to the number for example the floating point operations
+floating point operations or the rate at which is doing those uh
+or the rate at which is doing those uh operations
+operations and we also can of course refer to
+and we also can of course refer to memory in this
+memory in this same way and i'm sure you're you're used
+same way and i'm sure you're you're used to both of these things
+to both of these things and buying computers by looking at the
+and buying computers by looking at the number of bytes that um
+number of bytes that um data has and typically that if we're
+data has and typically that if we're looking at a double precision floating
+looking at a double precision floating point number
+point number not just typically but the definition of
+not just typically but the definition of that is it's really it's going to
+that is it's really it's going to require eight bytes of storage
+require eight bytes of storage so typically though on these computers
+so typically though on these computers the
+are in the millions the billions are the trillions
+trillions and so or even quadrillions and so these
+and so or even quadrillions and so these are the metrics
+are the metrics that the different units that we look at
+that the different units that we look at and i'll just mention one thing so i'm
+and i'll just mention one thing so i'm sure you're familiar with
+sure you're familiar with a kilobyte um and of both a kiloflop
+a kilobyte um and of both a kiloflop and a kilobyte we also use the the term
+and a kilobyte we also use the the term kibby byte or ki lower case ib
+kibby byte or ki lower case ib and that refers to the power of two
+and that refers to the power of two version sorry
+version sorry yeah the power of two version as opposed
+yeah the power of two version as opposed to the power of 10 version
+to the power of 10 version and a lot of times we sort of also kind
+and a lot of times we sort of also kind of
+of smoosh these two together and are a
+smoosh these two together and are a little bit careless about whether we're
+little bit careless about whether we're talking about
+talking about 10 to the third or two to the tenth when
+10 to the third or two to the tenth when we're talking about a kilobyte
+we're talking about a kilobyte and that carries forward to all of the
+and that carries forward to all of the others so you may not be so familiar
+others so you may not be so familiar with the
+with the gibby byte and this has to do with
+gibby byte and this has to do with actually a lawsuit that had to do with
+actually a lawsuit that had to do with a lawsuit over whether a disk drive was
+a lawsuit over whether a disk drive was actually storing
+actually storing 10 to the 9th or 2 to the 30th bytes
+10 to the 9th or 2 to the 30th bytes so that's why the vendors have gotten a
+so that's why the vendors have gotten a little bit more careful about that
+little bit more careful about that one of the things that we're trying to
+one of the things that we're trying to do today uh the department of energy is
+do today uh the department of energy is is to build an exo-flop computer an
+is to build an exo-flop computer an exo-flop computer will have 10 to the
+exo-flop computer will have 10 to the 18th floating point operations
+18th floating point operations as i mentioned the the quarry computer
+as i mentioned the the quarry computer is
+is a about 30 petaflop computer so 30
+a about 30 petaflop computer so 30 times 10 to the 15th floating point
+times 10 to the 15th floating point operations per second
+operations per second after exa you might think the next thing
+after exa you might think the next thing after x would be y but oops it's
+after x would be y but oops it's actually
+actually zeta zetta and then yada so those are
+zeta zetta and then yada so those are what we have to look forward if we have
+what we have to look forward if we have if we can figure out how to build
+if we can figure out how to build computers that are a thousand times
+computers that are a thousand times faster
+faster so we tend to look at these major
+so we tend to look at these major milestones just because they have names
+milestones just because they have names such as building an exoflop computer and
+such as building an exoflop computer and uh with any
+uh with any luck we may see our first exa flop
+luck we may see our first exa flop computer later this year not during the
+computer later this year not during the this course um but perhaps next summer
+this course um but perhaps next summer there will be a point of time at which
+there will be a point of time at which these may it may come out in the next
+these may it may come out in the next top 500
+top 500 i'd be more likely to think it will be
+i'd be more likely to think it will be next fall or even
+next fall or even next year sometime so the top 500
+next year sometime so the top 500 project is as i said a list of the 500
+project is as i said a list of the 500 most powerful computers in the world
+most powerful computers in the world that are at least willing to put their
+that are at least willing to put their computer on this list it's updated twice
+computer on this list it's updated twice a year once in june which is the isc
+a year once in june which is the isc conference in germany and once in
+conference in germany and once in november which is the
+november which is the what formerly named super computing
+what formerly named super computing conference still called
+conference still called sc but it has a much longer name today
+sc but it has a much longer name today but anyway the sc20 for example just
+but anyway the sc20 for example just happened in november
+happened in november it was not surprisingly a virtual
+it was not surprisingly a virtual meeting but normally
+meeting but normally uh it moves all over the u.s whereas the
+uh it moves all over the u.s whereas the isc conference is always in germany
+isc conference is always in germany and you can look at the this up on the
+and you can look at the this up on the top 500
+top 500 website now the yardstick so what how
+website now the yardstick so what how are we going to
+are we going to figure out how to measure these things
+figure out how to measure these things the yardstick is going to be
+the yardstick is going to be something called the linpack benchmark
+something called the linpack benchmark and linpack benchmark is going to solve
+and linpack benchmark is going to solve this dense matrix
+this dense matrix problem ax equals b so it's going to
+problem ax equals b so it's going to solve for x
+solve for x given a large matrix a and um b
+given a large matrix a and um b and a vector b and it's going to that
+and a vector b and it's going to that have some
+have some random entries in them and it turns out
+random entries in them and it turns out that this computation
+that this computation and jim demo will talk a lot more about
+and jim demo will talk a lot more about this
+this in a few weeks when he talks about dense
+in a few weeks when he talks about dense linear algebra
+linear algebra i'll talk a little bit more about it
+i'll talk a little bit more about it this week when we talk about matrix
+this week when we talk about matrix matrix multiply just on a single
+matrix multiply just on a single processor
+processor that the the these kinds of linear
+that the the these kinds of linear algebra operations
+algebra operations this particular one is going to be
+this particular one is going to be dominated by dense matrix matrix
+dominated by dense matrix matrix multiplication
+multiplication it is one of the fastest things that's
+it is one of the fastest things that's actually useful work that you can do
+actually useful work that you can do on one of these on any kind of a
+on one of these on any kind of a computer because it does order n
+computer because it does order n cubed arithmetic operations on order n
+cubed arithmetic operations on order n squared data
+squared data so this is the the problem that all of
+so this is the the problem that all of them are solving and it's set up that
+them are solving and it's set up that the benchmark is set up in a certain way
+the benchmark is set up in a certain way that you have to be able to prove you've
+that you have to be able to prove you've actually computed this you've actually
+actually computed this you've actually factored this matrix and
+factored this matrix and um or solved this linear system and that
+um or solved this linear system and that you
+there's certain rules also that you have to live by
+to live by so the fastest supercomputer in the
+so the fastest supercomputer in the world today is
+world today is in japan it's called the fugaco computer
+in japan it's called the fugaco computer and it is
+and it is based on arm processors and it
+based on arm processors and it which are fairly lightweight processors
+which are fairly lightweight processors and it has
+and it has over 150 000 nodes so a lot more than
+over 150 000 nodes so a lot more than the um the quarry system the peak
+the um the quarry system the peak performance of it
+performance of it is almost not quite up to a half an exit
+is almost not quite up to a half an exit flop so 442 petaflops
+flop so 442 petaflops that is then the number that you get
+that is then the number that you get when you use the entire machine to run
+when you use the entire machine to run the linpack benchmark or at least at
+the linpack benchmark or at least at some point when they
+some point when they they ran the linpack benchmark in the
+they ran the linpack benchmark in the entire machine by the way this takes a
+entire machine by the way this takes a long time because it is an order n cubed
+long time because it is an order n cubed computation
+computation even with all of that parallelism
+even with all of that parallelism solving such a
+solving such a a large problem that is spread out over
+a large problem that is spread out over the machine is going to take several
+the machine is going to take several hours
+hours if not over a day and one of the
+if not over a day and one of the problems today and running these ben
+problems today and running these ben this benchmark
+this benchmark on a really huge machine is keeping the
+on a really huge machine is keeping the machine up long enough not just
+machine up long enough not just the whole machine but keeping all of the
+the whole machine but keeping all of the processors and the network and
+processors and the network and everything
+everything up long enough in order to complete the
+up long enough in order to complete the benchmark
+there's a different benchmark which i will mention i think in a minute
+will mention i think in a minute which actually runs at an exa-flop or
+which actually runs at an exa-flop or what they call an e-flop here because
+what they call an e-flop here because it's actually not you doing 64-bit
+it's actually not you doing 64-bit floating-point arithmetic which as i
+floating-point arithmetic which as i said is what we normally mean when we
+said is what we normally mean when we talk about floating-point operations so
+talk about floating-point operations so this uh
+this uh this two-e-flop benchmark is using
+this two-e-flop benchmark is using not just 64-bit but also narrower
+not just 64-bit but also narrower precision arithmetic
+precision arithmetic it has its own custom interconnect as i
+it has its own custom interconnect as i said one of the things that makes
+said one of the things that makes a parallel computer and especially a
+a parallel computer and especially a supercomputer a supercomputer
+supercomputer a supercomputer is the interconnection network and this
+is the interconnection network and this is a custom network
+is a custom network that was that is called the tofu
+that was that is called the tofu interconnect
+
+now here's the list of the top 10 machines that are on the top 500 list so
+machines that are on the top 500 list so there's
+there's a fugaku built by fujitsu so they built
+a fugaku built by fujitsu so they built the
+system together uh things that are highlighted in green
+uh things that are highlighted in green on this slide you know
+on this slide you know it's not too much cut off here on the
+it's not too much cut off here on the side is
+side is um our our the things that have changed
+um our our the things that have changed since uh june of last year so this is
+since uh june of last year so this is the
+the list in november of 2020 and things that were that are
+of 2020 and things that were that are new or have changed on this list
+new or have changed on this list are the green items so they added
+are the green items so they added actually a few more nodes probably
+actually a few more nodes probably another cabinet or two
+another cabinet or two to the to the fugaku machine so got a
+to the to the fugaku machine so got a little bit faster
+little bit faster since last june the fastest the former
+since last june the fastest the former fastest machine in the world and this is
+fastest machine in the world and this is usually the way things work that the
+usually the way things work that the number two machine is the former number
+number two machine is the former number one machine
+one machine that is the summit machine at oak ridge
+that is the summit machine at oak ridge national labs
+national labs which and i'll say a little bit more
+which and i'll say a little bit more about that it's almost identical to the
+about that it's almost identical to the sierra system
+sierra system also built by ibm and with these power
+also built by ibm and with these power processors
+processors as well as nvidia gpus in it and then
+as well as nvidia gpus in it and then the uh then before that the fastest
+the uh then before that the fastest system in the world before these
+system in the world before these before oak ridge was on the that listed
+before oak ridge was on the that listed the top the fastest computer in the
+the top the fastest computer in the world was
+world was the um tahoe light machine in wuxi china
+the um tahoe light machine in wuxi china nvidia is a relatively new
+nvidia is a relatively new addition to the list so they built their
+addition to the list so they built their own large-scale cluster
+own large-scale cluster and or supercomputer and it is here at
+and or supercomputer and it is here at number five right now and
+number five right now and they had upgraded it since last june so
+they had upgraded it since last june so it moved up the list
+it moved up the list i think it was at number seven in june
+i think it was at number seven in june so you can see
+so you can see there's a lot of international
+there's a lot of international competition especially here at the top
+competition especially here at the top of the list where
+of the list where a lot of different company countries are
+a lot of different company countries are putting together
+putting together these large-scale hpc systems on the top
+these large-scale hpc systems on the top of
+the to be on the top of this top top 500 list the fastest
+list the fastest nsf machine is here the tac machine
+nsf machine is here the tac machine which is a relatively
+which is a relatively recent addition maybe about a year and a
+recent addition maybe about a year and a half old
+half old to the list as well so this is a little
+to the list as well so this is a little bit more detail about the summit system
+bit more detail about the summit system which is number one
+which is number one in the us and um
+in the us and um it has the the peak performance of about
+it has the the peak performance of about 200 petaflops
+200 petaflops and it has a much smaller number of
+and it has a much smaller number of nodes you notice it's got only four
+nodes you notice it's got only four hundred and
+four forty six hundred and eight nodes and each one of those
+and each one of those though has a a number of gpus on its six
+though has a a number of gpus on its six nvidia tesla v100 gpus so that's how it
+nvidia tesla v100 gpus so that's how it gets such high
+gets such high floating point performance especially on
+floating point performance especially on things like dense matrix multiply
+things like dense matrix multiply for those of you who are familiar with
+for those of you who are familiar with deep learning algorithms they're also
+deep learning algorithms they're also going to use
+going to use this kind of dense matrix matrix
+this kind of dense matrix matrix multiply so this machine
+multiply so this machine tends to be very well optimized for that
+tends to be very well optimized for that as well other than
+as well other than the and you but you have it has a
+the and you but you have it has a different network here than
+different network here than say it doesn't have a custom network as
+say it doesn't have a custom network as in the fugaku machine it has this
+in the fugaku machine it has this dual rail millinox network which is a
+dual rail millinox network which is a little bit more standard sort of cluster
+little bit more standard sort of cluster network
+network but it was put together by ibm and
+but it was put together by ibm and there's a little bit more detail on the
+there's a little bit more detail on the quarry system i won't read through this
+quarry system i won't read through this i really already
+i really already mentioned i think some of the high-level
+mentioned i think some of the high-level details about corey
+
+so to me one of the nice things about the top 500 list
+the top 500 list is that you can see the history of these
+is that you can see the history of these machines over time
+machines over time and this graph which we often show
+and this graph which we often show or often see is looking at three
+or often see is looking at three different numbers from the top 500 lists
+different numbers from the top 500 lists the number one machine is this orange
+the number one machine is this orange set of dashed lines and
+set of dashed lines and and in the middle here the the trend
+and in the middle here the the trend line is dashed and the solid one with
+line is dashed and the solid one with the squares on are the actual
+the squares on are the actual measurements the top 500
+measurements the top 500 uh the fastest machine in the top 500
+uh the fastest machine in the top 500 list what you can see from this line
+list what you can see from this line is that there will be a machine that is
+is that there will be a machine that is significantly has a jump up and then it
+significantly has a jump up and then it will sit there on the top 500
+will sit there on the top 500 each one of these squares would
+each one of these squares would represent six months uh roughly six
+represent six months uh roughly six months so june
+months so june through november and then november
+through november and then november through june
+through june and uh so that's the the fastest machine
+and uh so that's the the fastest machine on the top 500 it's a little bit
+on the top 500 it's a little bit bumpy the the slowest machine in the top
+bumpy the the slowest machine in the top 500 list which is still a very powerful
+500 list which is still a very powerful computer
+computer is the n equals 500 so that's the last
+is the n equals 500 so that's the last machine
+machine and probably the most interesting thing
+and probably the most interesting thing thing to see about
+thing to see about this machine is that it's really falling
+this machine is that it's really falling off of its
+off of its historical trend line that really had
+historical trend line that really had made a transition in about 2008 in terms
+made a transition in about 2008 in terms of how much the
+of how much the slowest machine in the top 500 list is
+slowest machine in the top 500 list is growing so these are
+growing so these are of course this is a logarithmic scale on
+of course this is a logarithmic scale on the y-axis so these are
+the y-axis so these are growing exponentially but nevertheless
+growing exponentially but nevertheless you see a pretty marked
+you see a pretty marked change in the rate at which the slowest
+change in the rate at which the slowest machine is increasing over time
+machine is increasing over time and that's really because of what we'll
+and that's really because of what we'll talk about near the end
+talk about near the end which is the end of dinard scaling and
+which is the end of dinard scaling and the
+just the challenges of trying to continue making single processors go
+continue making single processors go faster
+faster the the green line here is the sum of
+the the green line here is the sum of the performance of all 500 machines on
+the performance of all 500 machines on the list
+the list so this is also a little bit smoother
+so this is also a little bit smoother you can see it's also starting to fall
+you can see it's also starting to fall off a little bit here at the end
+off a little bit here at the end although not as quickly as the
+although not as quickly as the the last machine listed
+
+uh so um what is so n is just the in this case n m equals one means this
+in this case n m equals one means this line is referring to the first machine
+line is referring to the first machine on the list so the
+on the list so the nth machine where n is equal to one and
+nth machine where n is equal to one and this the orange line
+this the orange line is the nth machine where n is equal to
+is the nth machine where n is equal to 500.
+500. right it's the rank on the list so um
+right it's the rank on the list so um now there are other algorithms and other
+now there are other algorithms and other ways other arithmetic that you can use
+ways other arithmetic that you can use for solving ax equals b
+for solving ax equals b and on the fugaco machine for example
+and on the fugaco machine for example they've run a mixed precision version of
+they've run a mixed precision version of an algorithm called iterative refinement
+an algorithm called iterative refinement so jim may say a little bit more about
+so jim may say a little bit more about this when he talks about dense linear
+this when he talks about dense linear algebra
+algebra but basically what we're going to do is
+but basically what we're going to do is come up with an approximate uh
+come up with an approximate uh answer that's using lower precision
+answer that's using lower precision lower precision arithmetic which can be
+lower precision arithmetic which can be done much faster
+done much faster and then improve it later using some
+and then improve it later using some iteration to get
+iteration to get something that is as accurate as you
+something that is as accurate as you would have gotten with the original
+would have gotten with the original answer
+answer so with the original 64-bit floating
+so with the original 64-bit floating point and so this is
+point and so this is solving this enormous matrix problem
+solving this enormous matrix problem here
+here 16 million almost 17 million um
+16 million almost 17 million um n is equal to almost 17 million and it
+n is equal to almost 17 million and it ran on
+ran on over 150 000 nodes of fugaku
+over 150 000 nodes of fugaku and uh this achieved then these two
+and uh this achieved then these two exa-ops as i mentioned before
+exa-ops as i mentioned before eops and that's about uh four and a half
+eops and that's about uh four and a half times
+times more higher rate than the than the 442.
+more higher rate than the than the 442. and it gives you the same accuracy that
+and it gives you the same accuracy that you would have gotten from the 64-bit
+you would have gotten from the 64-bit arithmetic version
+arithmetic version but it's not allowed by the official top
+but it's not allowed by the official top 500 list because
+500 list because it really is not then measuring the
+it really is not then measuring the machine it's measuring this kind of
+machine it's measuring this kind of other way of doing things so in order to
+other way of doing things so in order to get a nice
+get a nice historical perspective they require that
+historical perspective they require that you run
+you run the algorithm in the traditional way of
+the algorithm in the traditional way of gaussian elimination
+
+now the other thing that you can see over the history of the top 500 list is
+over the history of the top 500 list is the types of machines that are on it
+the types of machines that are on it and there's if you look at the bottom
+and there's if you look at the bottom left corner here
+left corner here these were the vector super computers
+these were the vector super computers and cindy machines so at one point in
+and cindy machines so at one point in time
+time they were people were trying to build
+they were people were trying to build large-scale parallel machines
+large-scale parallel machines only with this semi idea that is one
+only with this semi idea that is one processor kind of broadcasting an
+processor kind of broadcasting an instruction out
+instruction out and it has a nice programming model but
+and it has a nice programming model but it turned out to be pretty hard to get
+it turned out to be pretty hard to get those to scale so after
+those to scale so after a while and actually because
+a while and actually because microprocessors kept getting faster
+microprocessors kept getting faster it made more sense to build shared
+it made more sense to build shared memory multiprocessors which are the
+memory multiprocessors which are the green things here
+green things here whoops and then the uh we we got to
+whoops and then the uh we we got to distributed memory multiprocessors here
+distributed memory multiprocessors here in the blue
+in the blue as well as this constellation is also a
+as well as this constellation is also a sort of a distributed memory
+sort of a distributed memory multiprocessor and clusters of x86
+multiprocessor and clusters of x86 processors lots and lots of those that
+processors lots and lots of those that were dominating the list
+were dominating the list and now what we're starting to see is a
+and now what we're starting to see is a lot more systems that have
+lot more systems that have accelerators of some kind so that means
+accelerators of some kind so that means something like a graphics processing
+something like a graphics processing unit
+unit so a processor that was really
+so a processor that was really originally designed for things like
+originally designed for things like graphics and
+graphics and multimedia applications but are now
+multimedia applications but are now being used in a general purpose way for
+being used in a general purpose way for these
+in these super computers and the thing that's also changed over this period of
+that's also changed over this period of time
+time is back when we were we were using
+is back when we were we were using vector super computers
+vector super computers it was fairly easy to take especially a
+it was fairly easy to take especially a fortran code
+fortran code and you would go in and annotate the
+and you would go in and annotate the loops in that code and
+loops in that code and it would but with some hints that would
+it would but with some hints that would help the compiler and the compiler would
+help the compiler and the compiler would automatically
+automatically parallelize that for you to run or
+parallelize that for you to run or really vectorize it to run in a vector
+really vectorize it to run in a vector super computer
+super computer today with clusters mpps
+today with clusters mpps any of these other things and all the
+any of these other things and all the accelerated image systems are also
+accelerated image systems are also distributed memory systems that then
+distributed memory systems that then have accelerated nodes you really have
+have accelerated nodes you really have to completely rethink your algorithms
+to completely rethink your algorithms and think about how are you going to
+and think about how are you going to solve this problem in parallel and
+solve this problem in parallel and really
+really write it in a fairly different way and
+write it in a fairly different way and so we can't just take the loops and
+so we can't just take the loops and annotate them
+annotate them there was some effort in trying to do
+there was some effort in trying to do that and we'll say a little bit more
+that and we'll say a little bit more maybe about compilers next time but
+maybe about compilers next time but so at today really all of the codes that
+so at today really all of the codes that run at scale on these kinds of high
+run at scale on these kinds of high performance computers on the top 500
+performance computers on the top 500 list
+list are written in say a message passing
+are written in say a message passing style or something else
+style or something else related this partition global address
+related this partition global address space style
+space style or something like that perhaps combined
+or something like that perhaps combined with some special
+with some special say graphics processing unit gpu
+say graphics processing unit gpu programming
+
+model so just looking at what kinds of
+so just looking at what kinds of accelerators are in the top 500 list
+accelerators are in the top 500 list this is a picture of the growth of those
+this is a picture of the growth of those accelerators and you can see the
+accelerators and you can see the different kind
+different kind lots of nvidia processors here so lots
+lots of nvidia processors here so lots of nvidia gpus
+of nvidia gpus there's a few other i think there's an
+there's a few other i think there's an amd gpu
+amd gpu and a few other more specialized things
+and a few other more specialized things the intel xeon phi
+the intel xeon phi which was considered at least on this
+which was considered at least on this table a a an accelerator
+table a a an accelerator that's the type of processor that's in
+that's the type of processor that's in the quarry system
+the quarry system in the um the knl and although it's not
+in the um the knl and although it's not really run as
+really run as a an accelerator it's really the entire
+a an accelerator it's really the entire multiprocessor
+
+so one of the things you can also see over time is as things have slowed down
+over time is as things have slowed down a little bit
+a little bit uh in terms of the ability to buy a
+uh in terms of the ability to buy a faster computer for say the same price
+faster computer for say the same price is the rate at which people replace
+is the rate at which people replace their super computers has slowed down
+their super computers has slowed down and the computers have gotten more
+and the computers have gotten more expensive over time
+expensive over time and they also don't have the same
+and they also don't have the same incremental boost in performance per
+incremental boost in performance per dollar that they had
+dollar that they had back in say the 90s and early 2000s
+back in say the 90s and early 2000s and so what this is is the average age
+and so what this is is the average age of the system that's on the top 500 list
+of the system that's on the top 500 list so you take all the systems in the top
+so you take all the systems in the top 500 list look at the point at which they
+500 list look at the point at which they were
+were added um to the um added to the top 500
+added um to the um added to the top 500 list so the ages in the number of months
+list so the ages in the number of months that they are on the top 500 list
+that they are on the top 500 list and as i said things sort of start at
+and as i said things sort of start at the top of the or
+the top of the or the largest system start at the top of
+the largest system start at the top of the top 500 list smaller systems will
+the top 500 list smaller systems will come in at any
+come in at any particular point i think for example the
+particular point i think for example the quarry system came in at around number
+quarry system came in at around number five
+five and then has moved down so it's no
+and then has moved down so it's no longer on the top ten
+longer on the top ten but what you can see from this is that
+but what you can see from this is that the systems are getting older because
+the systems are getting older because people run them longer
+people run them longer and because other systems nobody has
+and because other systems nobody has bought faster systems that overtake them
+bought faster systems that overtake them on the top 500 list
+on the top 500 list and so this is just there's less
+and so this is just there's less incentive to upgrade
+
+now the linpack benchmark is only one of the metrics that people use
+the metrics that people use for measuring the performance of these
+for measuring the performance of these systems and one that i think is
+systems and one that i think is probably and the linpac benchmark and
+probably and the linpac benchmark and this top 500 list therefore are
+this top 500 list therefore are sometimes criticized by a lot of people
+sometimes criticized by a lot of people because
+because we don't typically solve large dense
+we don't typically solve large dense linear systems in this way using
+linear systems in this way using something like dense lu factorization on
+something like dense lu factorization on an enormous you know
+an enormous you know millions or billions of element matrices
+millions or billions of element matrices and so
+and so those kind which are the kinds of
+those kind which are the kinds of problems that you would run across the
+problems that you would run across the um the entire machine or a million
+um the entire machine or a million million dimension matrices so
+million dimension matrices so one of the prizes that's given away
+one of the prizes that's given away which is much more subjective
+which is much more subjective is looking at application performance
+is looking at application performance and so this is
+and so this is given out every year as the at the
+given out every year as the at the sc conference and this is a particular
+sc conference and this is a particular set of
+set of winners who actually won for a number of
+winners who actually won for a number of different applications so they
+different applications so they they gave out multiple awards that year
+they gave out multiple awards that year and there's a group from berkeley
+and there's a group from berkeley actually from
+actually from from nurse the national energy research
+from nurse the national energy research scientific computing center which is
+scientific computing center which is where corey is housed that's that's on
+where corey is housed that's that's on this particular picture
+this particular picture and this is funded by gordon bell who's
+and this is funded by gordon bell who's one of the pioneers in hpc
+one of the pioneers in hpc and he uh he he donated money so that
+and he uh he he donated money so that there's a hundred
+there's a hundred a hundred sorry a ten thousand dollar
+a hundred sorry a ten thousand dollar cash prize uh every year for doing this
+cash prize uh every year for doing this and in this particular year there were a
+and in this particular year there were a few different applications as i said
+few different applications as i said that one
+
+so how does how do you compare the gordon bell prize in the top 500. so i
+gordon bell prize in the top 500. so i actually actually plotted this
+actually actually plotted this a number of years ago and was surprised
+a number of years ago and was surprised to see actually how
+to see actually how these these things tend to track each
+these these things tend to track each other that is
+other that is the admittedly this is these are
+the admittedly this is these are floating point operations per
+floating point operations per second on the left on the y-axis
+second on the left on the y-axis i guess i didn't put the units on there
+i guess i didn't put the units on there and so we're looking at something like a
+and so we're looking at something like a paddle flop here
+paddle flop here at um the 10 to the 15th and we're
+at um the 10 to the 15th and we're getting up to an exit flop
+getting up to an exit flop so this gordon bell price here that's up
+so this gordon bell price here that's up at the top
+at the top in that this yellow square is one that
+in that this yellow square is one that was not using double precision
+was not using double precision floating point operation that's why it
+floating point operation that's why it exceeded an exit flop even though we
+exceeded an exit flop even though we don't have any exa-flop
+don't have any exa-flop linpack machines on the top 500 list yet
+linpack machines on the top 500 list yet and you can see that these gordon bell
+and you can see that these gordon bell prizes though
+prizes though um roughly have tracked the performance
+um roughly have tracked the performance of these so people will
+of these so people will often take whatever is the top the
+often take whatever is the top the fastest machine on the top 500 list
+fastest machine on the top 500 list or the fastest one or two and try to run
+or the fastest one or two and try to run applications across the scale of the
+applications across the scale of the entire machine and i will mention a
+entire machine and i will mention a little bit about one of these
+little bit about one of these applications when i talk more about
+applications when i talk more about science that we do
+science that we do with these machines but these have been
+with these machines but these have been typically
+typically one of the very very common things would
+one of the very very common things would be large-scale chemistry or material
+be large-scale chemistry or material science calculations
+science calculations sometimes a climate computation although
+sometimes a climate computation although that's a little bit harder
+that's a little bit harder and and more recently some machine
+and and more recently some machine learning and biology applications
+
+all right so the next thing i'm going to talk about is science that uses high
+talk about is science that uses high performance computing
+performance computing i will stop there just to make sure that
+i will stop there just to make sure that there aren't any other
+there aren't any other questions i see that um people have been
+questions i see that um people have been asking and
+asking and in some cases answering them in the chat
+in some cases answering them in the chat but please feel free to
+but please feel free to add some more questions if you have any
+add some more questions if you have any on this part
+
+all right so let's go ahead and talk about science that uses these high
+about science that uses these high performance computers
+performance computers so when we started teaching this class
+so when we started teaching this class we used to
+we used to use this this slide in order to show
+use this this slide in order to show the third pillar of science was really
+the third pillar of science was really simulation
+simulation and most of what we talked about in this
+and most of what we talked about in this class were the computational methods
+class were the computational methods that we use
+that we use for modeling and simulation so what is
+for modeling and simulation so what is what does that mean well we've got
+what does that mean well we've got in traditional scientific methods we've
+in traditional scientific methods we've got theory and experimentation right so
+got theory and experimentation right so when you're
+when you're back in maybe i don't know grade school
+back in maybe i don't know grade school maybe high school you learned f equals m
+maybe high school you learned f equals m a
+you've got experiments maybe you're doing some things where you're rolling
+doing some things where you're rolling cars down down different inclines and
+cars down down different inclines and things like that
+things like that trying to figure out um this to validate
+trying to figure out um this to validate this formula that's well known
+this formula that's well known so there you've got theory and
+so there you've got theory and experimentation which you all learned as
+experimentation which you all learned as part of the scientific process
+part of the scientific process simulation says that we might take the
+simulation says that we might take the theory and
+theory and implement it as a large computer program
+implement it as a large computer program so something much more complicated than
+so something much more complicated than f equals m a although that might be a
+f equals m a although that might be a piece
+piece of what we're implementing and we then
+of what we're implementing and we then use that in order to make predictions
+use that in order to make predictions about what
+about what uh what what that simulation tells us
+uh what what that simulation tells us will happen in the future
+will happen in the future so we use simulation in science and in
+so we use simulation in science and in engineering especially
+engineering especially for problems that are too big or too
+for problems that are too big or too small
+small so something like understanding the
+so something like understanding the universe we we use it to understand
+universe we we use it to understand cosmology to simulate the universe for
+cosmology to simulate the universe for things like folding of proteins
+things like folding of proteins trying to understand how those proteins
+trying to understand how those proteins are going to fold we
+are going to fold we we use it for things that are too fast
+we use it for things that are too fast so for example a combustion process in
+so for example a combustion process in inside of a jet engine where we can't
+inside of a jet engine where we can't really see all of the details
+really see all of the details and it's and it's happening too quickly
+and it's and it's happening too quickly or things that are too slow like climate
+or things that are too slow like climate change
+so well we could wait for climate change to happen in some sense we have i guess
+to happen in some sense we have i guess but we really would like to make
+but we really would like to make predictions about what will happen in
+predictions about what will happen in the future
+the future without waiting for the climate to
+without waiting for the climate to change we also use it for things that
+change we also use it for things that are too expensive
+are too expensive or things that are too dangerous to do
+or things that are too dangerous to do inside a laboratory environment inside
+inside a laboratory environment inside of experimental setup
+
+so a couple of examples so here's an example of a climate modeling
+example of a climate modeling a climate model that is showing the
+a climate model that is showing the effects
+the uh effects of climate change and how it's increasing
+it's increasing the number of hurricanes that are
+the number of hurricanes that are happening and this
+happening and this is unfortunately a bit pixelated the
+is unfortunately a bit pixelated the actual simulation
+actual simulation is quite detailed that pixelation is
+is quite detailed that pixelation is coming from the visualization right now
+coming from the visualization right now and i'm not quite sure why
+and i'm not quite sure why maybe through zoom and um but you can
+maybe through zoom and um but you can see these swirls here which
+see these swirls here which are the hurricanes and actually it's
+are the hurricanes and actually it's used to
+used to um then then predict how many hurricanes
+um then then predict how many hurricanes are likely to occur
+are likely to occur if the climate warms by let's say two or
+if the climate warms by let's say two or three degrees
+
+now it turns out that one of the things that we do
+that we do in these simulations is to look at
+in these simulations is to look at over time is we've gotten higher
+over time is we've gotten higher resolution versions of the earth
+resolution versions of the earth and i showed you before on the side when
+and i showed you before on the side when i was talking about mapping
+i was talking about mapping climate modeling onto a parallel machine
+climate modeling onto a parallel machine that we divide the globe up into these
+that we divide the globe up into these pieces such as a little hexagon
+pieces such as a little hexagon hexagons and the um the resolution then
+hexagons and the um the resolution then would be something like say 25
+would be something like say 25 kilometers in a lot of the standard
+kilometers in a lot of the standard production models which is this this uh
+production models which is this this uh image here the movie that's at the
+image here the movie that's at the bottom
+bottom looks a little bit better on this slide
+looks a little bit better on this slide than it did in the previous one
+than it did in the previous one versus a machine that's say 10 years
+versus a machine that's say 10 years older where we would only have been able
+older where we would only have been able to run a 200 kilometer resolution so
+to run a 200 kilometer resolution so what does that mean there's that means
+what does that mean there's that means there's
+there's really only variables every 200
+really only variables every 200 kilometers
+kilometers or on the bottom variables that are
+or on the bottom variables that are measuring things like pressure
+measuring things like pressure and humidity and wind speed and all of
+and humidity and wind speed and all of those kinds of things in
+those kinds of things in the uh every 25 kilometers and today we
+the uh every 25 kilometers and today we there are some simulations that are
+there are some simulations that are being done about 10 times faster
+being done about 10 times faster at the order of two kilometers but
+at the order of two kilometers but typically not entire
+typically not entire full-scale um global simulations but
+full-scale um global simulations but that and that's one of the reasons
+that and that's one of the reasons that we want to build exit scale
+that we want to build exit scale computers is to allow this kind of
+computers is to allow this kind of very detailed simulations what you can
+very detailed simulations what you can see hopefully visually from this
+see hopefully visually from this is the difference between the top and
+is the difference between the top and the bottom is not just that there's more
+the bottom is not just that there's more detail
+detail but actually that the the um hurricanes
+but actually that the the um hurricanes a lot of these these extreme events are
+a lot of these these extreme events are not really visible up here in the top
+not really visible up here in the top simulation
+simulation it's been smoothed out by the fact that
+it's been smoothed out by the fact that you just don't have enough resolution
+you just don't have enough resolution and so one of the things that you get
+and so one of the things that you get from these faster computers
+from these faster computers is the ability to get more resolution
+is the ability to get more resolution and then better predictions
+and then better predictions about many different things
+about many different things so another example from basic science
+so another example from basic science which is some work by dan cason or that
+which is some work by dan cason or that that he's leading as part of the
+that he's leading as part of the exoskille computing project is looking
+exoskille computing project is looking at astrophysics
+at astrophysics so this picture on the left shows the
+so this picture on the left shows the debris from a supernova
+debris from a supernova explosion and that is shredding a star
+explosion and that is shredding a star that's nearby which is the blue part of
+that's nearby which is the blue part of this so the red
+this so the red the supernova is in red and the the star
+the supernova is in red and the the star that's being shredded by the supernova
+that's being shredded by the supernova explosion
+explosion is the blue thing and they were very
+is the blue thing and they were very excited
+excited a few years ago when the experiments
+a few years ago when the experiments first started coming back from ligo and
+first started coming back from ligo and virgo
+virgo that the observations that they were
+that the observations that they were seeing
+seeing match the simulations of gravitational
+match the simulations of gravitational waves that they had done
+waves that they had done a number of years earlier and and now
+a number of years earlier and and now we're using they're using these
+we're using they're using these simulations to predict
+simulations to predict how many how much uh these sort of heavy
+how many how much uh these sort of heavy different materials are coming out of
+different materials are coming out of these supernova explosions and things
+these supernova explosions and things like that looking at say 200 earth's
+like that looking at say 200 earth's worth of gold so these are simulation
+worth of gold so these are simulation results
+results 500 earth's worths of platinum and so on
+
+the hpc is also used for a number of different energy applications
+different energy applications and this was actually an example from a
+and this was actually an example from a code originally developed and still
+code originally developed and still being used
+being used in the as part of the exascale computing
+in the as part of the exascale computing project which is the department of
+project which is the department of energy's
+energy's large-scale computing effort right now
+large-scale computing effort right now and they have about
+and they have about 25 applications and this one is looking
+25 applications and this one is looking at subsurface modeling so if you're
+at subsurface modeling so if you're looking at
+looking at what happens after fracking or you're
+what happens after fracking or you're looking at what happens if you're
+looking at what happens if you're if you try to sequester pump something
+if you try to sequester pump something underground
+underground uh understand the structure of what that
+uh understand the structure of what that region is going to
+region is going to have what what the stability of that
+have what what the stability of that region will be or something after you've
+region will be or something after you've changed its subsurface so that's the
+changed its subsurface so that's the subsurface modeling but this
+subsurface modeling but this same code was then used a few years ago
+same code was then used a few years ago to work with the paper industry and a
+to work with the paper industry and a consortium there
+consortium there to try to improve the way in which paper
+to try to improve the way in which paper is
+paper making is the fourth largest any energy consumer in the us
+energy consumer in the us and the real energy part hungry part of
+and the real energy part hungry part of it is drying the paper the pulp out
+it is drying the paper the pulp out and so they're looking at ways of what
+and so they're looking at ways of what what are ways in which you can make the
+what are ways in which you can make the the drying process more efficient these
+the drying process more efficient these both of these tech
+both of these tech these applications are using something
+these applications are using something called adaptive mesh refinement
+called adaptive mesh refinement which is a hierarchical algorithm and
+which is a hierarchical algorithm and we'll talk a little bit more about that
+we'll talk a little bit more about that later in the semester
+
+now an example that's really more of a high throughput problem so rather than
+high throughput problem so rather than use doing one big huge simulation
+use doing one big huge simulation or even a number of big huge simulations
+or even a number of big huge simulations as you are in the case of climate
+as you are in the case of climate modeling
+modeling this is a high throughput problem where
+this is a high throughput problem where you're running massive numbers of
+you're running massive numbers of simulations as part of the materials
+simulations as part of the materials project
+project this is part of the national materials
+this is part of the national materials genome initiative at least that's how
+genome initiative at least that's how it was started and they're looking at
+it was started and they're looking at all these different materials properties
+all these different materials properties this project really started by looking
+this project really started by looking at there again materials for energy
+at there again materials for energy for energy applications such as
+for energy applications such as batteries solar panels things like that
+batteries solar panels things like that especially batteries and then looking
+especially batteries and then looking doing a search through all of these
+doing a search through all of these different types of
+different types of materials using simulation of each of
+materials using simulation of each of those materials to get
+those materials to get the the various properties out of that
+the the various properties out of that trying to find what which would be the
+trying to find what which would be the most
+most efficient storage medium how they're going to
+they're going to hold up to heat and things like that
+hold up to heat and things like that this is actually being combined today
+this is actually being combined today with some machine learning algorithms
+with some machine learning algorithms and that will be one of the later themes
+and that will be one of the later themes that will come up in terms of these
+that will come up in terms of these applications but it started out as a
+applications but it started out as a high throughput simulation and um
+high throughput simulation and um and the um
+and the um where you're looking at a very large
+where you're looking at a very large number of very large number of
+number of very large number of computations of different materials as
+computations of different materials as opposed to as i said one big huge
+opposed to as i said one big huge simulation
+
+so the next example is carbon capture and this is work being
+carbon capture and this is work being done by jeff long also looking at
+done by jeff long also looking at large numbers of different types of
+large numbers of different types of metal org in this case metal organic
+metal org in this case metal organic frameworks
+frameworks these particular structures that can be
+these particular structures that can be used to sort of zip up carbon and
+used to sort of zip up carbon and capture it
+capture it you can use these for example at a coal
+you can use these for example at a coal burning
+burning other sorts of power plants that rather
+other sorts of power plants that rather than releasing the carbon into the
+than releasing the carbon into the atmosphere
+atmosphere you capture before it's released they
+you capture before it's released they some of the things that they've designed
+some of the things that they've designed in their group are very
+in their group are very efficient in terms of removing co2 from
+efficient in terms of removing co2 from the flue gas
+the flue gas and they are also one of the other
+and they are also one of the other things you worry about is can you reuse
+things you worry about is can you reuse them
+them can you reuse these these metal organic
+can you reuse these these metal organic framework structures and so
+framework structures and so they can clean them fairly efficiently
+they can clean them fairly efficiently with with minimal amounts of energy
+with with minimal amounts of energy using steam
+using steam and they use something called density
+and they use something called density functional theory this project also has
+functional theory this project also has some work going on in collaboration with
+some work going on in collaboration with joy gonzalez's group
+joy gonzalez's group here in the eecs department looking at
+here in the eecs department looking at machine learning to help with the
+machine learning to help with the exploration of this space
+exploration of this space and perhaps one of the first
+and perhaps one of the first applications of high performance
+applications of high performance computing that was done last spring
+computing that was done last spring after the covid epidemic broke out was
+after the covid epidemic broke out was the pandemic was looking at molecular
+the pandemic was looking at molecular docking
+docking of various known drug compounds that
+of various known drug compounds that could be
+could be used screened against the the sars cova2
+used screened against the the sars cova2 spike protein so the particular
+spike protein so the particular part of the protein to look for some of
+part of the protein to look for some of the most
+the most promising therapeutics so some medical
+promising therapeutics so some medical therapeutics that could be used and some
+therapeutics that could be used and some of these
+of these of the they screened 8 000 of them
+of the they screened 8 000 of them identified 77 of the most promising and
+identified 77 of the most promising and some of them have
+some of them have continued to be explored such as some
+continued to be explored such as some anti-aging drugs and things like that
+anti-aging drugs and things like that so just to i won't give you go into
+so just to i won't give you go into details on the others i've talked about
+details on the others i've talked about a few of these but
+a few of these but across lawrence berkeley national lab
+across lawrence berkeley national lab and
+and many of these have partnerships with uc
+many of these have partnerships with uc berkeley there are people working on all
+berkeley there are people working on all of these different
+of these different application problems for exascale
+application problems for exascale computers
+computers now the ones at the bottom the two right
+now the ones at the bottom the two right ones right bottom ones genomics and
+ones right bottom ones genomics and photon science
+photon science are a little bit different than the
+are a little bit different than the others because they do not involve
+others because they do not involve simulation
+simulation and um these are really data analysis
+and um these are really data analysis problems which is the next big
+problems which is the next big theme for why we build supercomputers
+theme for why we build supercomputers and what we use them for
+and what we use them for so sometimes this is called the fourth
+so sometimes this is called the fourth paradigm of science data analysis
+paradigm of science data analysis and so we've got theory experimentation
+and so we've got theory experimentation simulation but now we're going to be
+simulation but now we're going to be analyzing for example experimental data
+analyzing for example experimental data although it turns out we'll also use
+although it turns out we'll also use data analysis
+data analysis to analyze the output of the simulations
+to analyze the output of the simulations because the output of simulations can be
+because the output of simulations can be quite large
+quite large so in science and engineering we use
+so in science and engineering we use high performance data analytics or hpda
+high performance data analytics or hpda so
+sometimes called for things that are too big that is data sets that are too big
+big that is data sets that are too big they're too complicated
+they're too complicated they're coming at us too fast they're
+they're coming at us too fast they're streaming at us
+streaming at us from say telescopes or something they're
+from say telescopes or something they're too noisy
+too noisy or they're too heterogeneous so they may
+or they're too heterogeneous so they may come from a number of different types of
+come from a number of different types of sources for example
+sources for example so this just shows you some examples in
+so this just shows you some examples in the pictures images coming from
+the pictures images coming from telescopes
+telescopes there's particle detectors other kinds
+there's particle detectors other kinds of experimental devices such as the
+of experimental devices such as the advanced light source
+advanced light source which is at lawrence berkeley national
+which is at lawrence berkeley national lab that that are producing very high
+lab that that are producing very high data rate images or some kinds of
+data rate images or some kinds of sensors that are collecting data from
+sensors that are collecting data from those their sensors also spread out all
+those their sensors also spread out all over the world
+over the world in the case of energy and environmental
+in the case of energy and environmental applications this is an example of a
+applications this is an example of a carbon sensor that's out in the wild
+carbon sensor that's out in the wild collecting information about how much
+collecting information about how much carbon is in the atmosphere
+carbon is in the atmosphere and of course genome sequencers which
+and of course genome sequencers which are used to analyze
+are used to analyze genomes this was a graph that i put
+genomes this was a graph that i put together
+together probably now 10 years ago but people
+probably now 10 years ago but people often
+often like to refer to it's a very simple idea
+like to refer to it's a very simple idea this is just looking at the
+this is just looking at the um the annual growth rate of these
+um the annual growth rate of these different types of technologies
+different types of technologies with the exception of sequencers which
+with the exception of sequencers which had a little bump that is
+had a little bump that is there and i think around 2010
+there and i think around 2010 or 2011 i guess and this is looking at
+or 2011 i guess and this is looking at how the data rates from sequencers from
+how the data rates from sequencers from and from detectors such as that are that
+and from detectors such as that are that are used in
+are used in all of these different kinds of
+all of these different kinds of experimental devices how their data
+experimental devices how their data rates have been growing over time
+rates have been growing over time and what you can see here is that
+and what you can see here is that they're growing much faster than
+they're growing much faster than processor speed which is this green line
+processor speed which is this green line in at the bottom and you might say well
+in at the bottom and you might say well maybe we don't care about processor
+maybe we don't care about processor speed but we care about memory
+speed but we care about memory and this is the the memory line is even
+and this is the the memory line is even lower than the processor performance
+lower than the processor performance that'll be a theme that will come up
+that'll be a theme that will come up also later in the semester where we
+also later in the semester where we worry about
+worry about the cost of data and data movement
+the cost of data and data movement relative to the cost of
+relative to the cost of the cost of processing which is growing
+the cost of processing which is growing faster
+faster so an example from a project in which
+so an example from a project in which i'm the pi and i
+i'm the pi and i bullish another what my co-instructors
+bullish another what my co-instructors is working on
+is working on is the is genome assembly and
+is the is genome assembly and specifically looking at the genomes that
+specifically looking at the genomes that occur in the environment so
+occur in the environment so a lot of times when you hear the word
+a lot of times when you hear the word genome you automatically think human
+genome you automatically think human genome
+this is talking about the genome of bacteria
+bacteria fungus and other microbes that live out
+fungus and other microbes that live out in the environment uh you've heard about
+in the environment uh you've heard about your gut microbiome but these are the
+your gut microbiome but these are the same types of things that live
+same types of things that live all over and these are a number of
+all over and these are a number of scientific questions that scientists
+scientific questions that scientists that look at these microbes have studied
+that look at these microbes have studied had used have used our high performance
+had used have used our high performance genome assembler which is called
+genome assembler which is called metahimmer in order to study
+metahimmer in order to study and you can see that they're looking at
+and you can see that they're looking at terabytes of data the problem is that
+terabytes of data the problem is that the sequencers
+the sequencers spit out the information about the
+spit out the information about the genome in little fragments and so what
+genome in little fragments and so what the assembler does is it tries to to put
+the assembler does is it tries to to put those fragments together
+those fragments together so that you get a more complete picture
+so that you get a more complete picture of what the genome looks like
+of what the genome looks like in the case of these kinds of apple
+in the case of these kinds of apple these kinds of genomes that are coming
+these kinds of genomes that are coming from say
+from say soil it's scooping up some soil and then
+soil it's scooping up some soil and then you might have a hundred
+you might have a hundred or even thousands of different species
+or even thousands of different species mixed into that soil
+mixed into that soil the sequencer has that data all mixed
+the sequencer has that data all mixed together so the assembler has to
+together so the assembler has to reconstruct
+reconstruct as much as it can of the genome of all
+as much as it can of the genome of all those individual species
+
+and this is an example of that gordon bell prize that i mentioned
+bell prize that i mentioned earlier from 2008 from sc 18
+earlier from 2008 from sc 18 this is looking at different
+this is looking at different combinations of gene expression data in
+combinations of gene expression data in plants
+plants to try to understand the photosynthesis
+to try to understand the photosynthesis process and the different strategies
+process and the different strategies in particular they're looking at the
+in particular they're looking at the amount of water that's being used by
+amount of water that's being used by different photosynthesis
+different photosynthesis processes in different plants this plant
+processes in different plants this plant called colon choi
+called colon choi and as well as pineapple use a very
+and as well as pineapple use a very water sparing photosynthesis process
+water sparing photosynthesis process so they're looking at the genomes and
+so they're looking at the genomes and this is the the
+this is the the pineapple is in yellow and the green is
+pineapple is in yellow and the green is the
+but they're really looking at combinations of genes so this is not
+combinations of genes so this is not just looking at single genes
+just looking at single genes but combinations which is where they
+but combinations which is where they used the uh
+used the uh the this at the time fastest computer in
+the this at the time fastest computer in the world which was
+the world which was the um the summit supercomputer at oak
+the um the summit supercomputer at oak ridge
+ridge and actually used i believe the graphics
+and actually used i believe the graphics processing units
+processing units in in this this these narrower data
+in in this this these narrower data types in order to get very fast
+types in order to get very fast performance on this
+performance on this it's kind of a brute force approach and
+it's kind of a brute force approach and it ended up with this
+it ended up with this two 2.3 six extra ops of performance
+two 2.3 six extra ops of performance that's with 16-bit arithmetic
+that's with 16-bit arithmetic now so we've talked about the four
+now so we've talked about the four paradigms of science
+paradigms of science some people would say maybe there's a
+some people would say maybe there's a fifth paradigm which is machine learning
+fifth paradigm which is machine learning we will use machine learning a lot in
+we will use machine learning a lot in science for data analysis problems
+science for data analysis problems and to help us make build models that we
+and to help us make build models that we can put into simulation so these things
+can put into simulation so these things are all
+are all related to one another but there's also
+related to one another but there's also places where we're really using machine
+places where we're really using machine learning as an
+learning as an automation tool and so when we look at
+automation tool and so when we look at machine learning you may say well why do
+machine learning you may say well why do we need super computers for machine
+we need super computers for machine learning
+learning this is a now famous graph from open ai
+this is a now famous graph from open ai that looks at the the amount of
+that looks at the the amount of computing that was used for
+computing that was used for training deep neural nets so starting
+training deep neural nets so starting with alex net in 2011
+with alex net in 2011 and alpha to alpha goes zero in 2018
+and alpha to alpha goes zero in 2018 and this is an exponential growth curve
+and this is an exponential growth curve this growth curve by the way is much
+this growth curve by the way is much faster much steeper than what you would
+faster much steeper than what you would have gotten from say the top 500 list
+have gotten from say the top 500 list which was also growing exponentially
+which was also growing exponentially this line up here in blue at the top at
+this line up here in blue at the top at that 10 000 really is equivalent to
+that 10 000 really is equivalent to about an extra flop of performance for
+about an extra flop of performance for one day
+one day so if you had an exa flop computer and
+so if you had an exa flop computer and you were going to
+you were going to train it on say alphago zero you could
+train it on say alphago zero you could do it in a little under a day
+do it in a little under a day that's still an enormous amount of
+that's still an enormous amount of computing to use for one of these
+computing to use for one of these problems these are
+problems these are these machines are hundreds of millions
+these machines are hundreds of millions or the the fugaco machine is reported to
+or the the fugaco machine is reported to be a billion dollars at least for the
+be a billion dollars at least for the entire
+entire project that put it together um but just
+project that put it together um but just to compare
+to compare this was a 300 000 increase in the
+this was a 300 000 increase in the amount of computing computation the
+amount of computing computation the number of floating point operations that
+number of floating point operations that you needed
+you needed from alex net to alpha go zero or
+from alex net to alpha go zero or actually the petaflop days sorry
+actually the petaflop days sorry that petaflop per second if you had a
+that petaflop per second if you had a single petaflop machine and you ran it
+single petaflop machine and you ran it for a day
+for a day that's what the y-axis is here and so
+that's what the y-axis is here and so this increased by a factor of 300
+this increased by a factor of 300 000 whereas the top 500 machines during
+000 whereas the top 500 machines during that time the fastest machine
+that time the fastest machine on the top 500 list grew by less than a
+on the top 500 list grew by less than a factor of 10.
+factor of 10. so these machine learning algorithms
+so these machine learning algorithms really are becoming very computationally
+really are becoming very computationally expensive as i'm sure many of you know
+expensive as i'm sure many of you know now
+now you may be familiar with the idea of
+you may be familiar with the idea of machine learning for things like image
+machine learning for things like image classification
+classification and object detection and this slide
+and object detection and this slide which is one of my favorites put
+which is one of my favorites put together by
+together by prabhat who at the time was at at nurse
+prabhat who at the time was at at nurse at lawrence berkeley lab
+at lawrence berkeley lab is doing um talking about how you can
+is doing um talking about how you can compare those kinds of image problems to
+compare those kinds of image problems to problems that come up in science he was
+problems that come up in science he was working actually with
+working actually with climate modeling data his team by the
+climate modeling data his team by the way also won
+way also won the second one of the gordon bell prizes
+the second one of the gordon bell prizes at sc 18 for this
+at sc 18 for this kind of this kind of work which may be
+kind of this kind of work which may be on my next slide but
+on my next slide but what are we what are they doing here
+what are we what are they doing here well they're looking at climate
+well they're looking at climate simulation data
+simulation data not an image data and they're trying to
+not an image data and they're trying to identify
+identify extreme sorts of climate events in that
+extreme sorts of climate events in that data such as hurricanes
+data such as hurricanes or what this orange box here and the
+or what this orange box here and the middle has
+middle has is an atmospheric river so you're doing
+is an atmospheric river so you're doing image cl
+image cl you're doing classification not of
+you're doing classification not of images but of
+images but of all these three-dimensional variables
+all these three-dimensional variables that are coming out of the simulation
+that are coming out of the simulation so these are this is much different from
+so these are this is much different from that standpoint
+that standpoint than than a convolutional neural net
+than than a convolutional neural net used for image classification
+used for image classification but it has roughly the same idea and
+but it has roughly the same idea and they extended it
+they extended it to work on this much more complex
+to work on this much more complex scientific data
+scientific data the climate modeling data and it can
+the climate modeling data and it can also do localization
+also do localization it can do segmentation that is it can
+it can do segmentation that is it can find where are
+find where are exactly the different objects inside of
+exactly the different objects inside of that simulation
+that simulation data and then it can segment them it can
+data and then it can segment them it can find really the outline of what they
+find really the outline of what they look like
+look like and it turns out that um this is
+and it turns out that um this is showing a simulation of sorry it's an
+showing a simulation of sorry it's an animation of showing these extreme
+animation of showing these extreme events that are identified on the left
+events that are identified on the left hand being done by machine learning on
+hand being done by machine learning on the right hand
+the right hand is the ground truth data that was used
+is the ground truth data that was used uh to
+uh to both to train the data but then to run
+both to train the data but then to run in this this test against it and what
+in this this test against it and what um it turns out that they they found
+um it turns out that they they found that the deep learning results were
+that the deep learning results were actually
+actually better in the sense that you got
+better in the sense that you got smoother results than you got the
+smoother results than you got the then you got from the heuristic labels
+then you got from the heuristic labels which is the way that
+which is the way that climate scientists were solving
+climate scientists were solving identifying these things before
+identifying these things before and you may think well a hurricane is
+and you may think well a hurricane is such a large event why do you need
+such a large event why do you need an automatic tool to find it and the
+an automatic tool to find it and the answer is
+answer is because you're running say 100 years
+because you're running say 100 years worth of simulations you're trying to
+worth of simulations you're trying to count how many hurricanes
+count how many hurricanes or atmospheric rivers there were over
+or atmospheric rivers there were over that period of time
+that period of time so as i said that was the second gordon
+so as i said that was the second gordon bell prize that year also on the summit
+bell prize that year also on the summit system
+
+people are also using machine learning to generate scientific data
+to generate scientific data this is an example of using uh
+this is an example of using uh generative adversarial neural nets to
+generative adversarial neural nets to build what are called convergence map
+build what are called convergence map of gravitational lensing so you're
+of gravitational lensing so you're trying to understand
+trying to understand something about the universe and using
+something about the universe and using and
+and building these maps which actually have
+building these maps which actually have turned out to be as statistically
+turned out to be as statistically accurate as
+accurate as what they were doing before which was to
+what they were doing before which was to run large-scale simulations
+run large-scale simulations so they're they're using this to help
+so they're they're using this to help understand the
+understand the uh various characteristics of the
+uh various characteristics of the universe as well
+
+so the um you may wonder and what what are we going to do in this class
+are we going to do in this class about the fact that there's all of these
+about the fact that there's all of these scientific disciplines and i'll say a
+scientific disciplines and i'll say a little bit more about who's in the class
+little bit more about who's in the class but many of you
+but many of you are from across different departments on
+are from across different departments on campus
+campus and some of you may know a lot more than
+and some of you may know a lot more than i know about climate modeling or about
+i know about climate modeling or about biology or about chemistry or material
+biology or about chemistry or material science
+science and how are all you know 120 of you
+and how are all you know 120 of you going to learn enough about all these
+going to learn enough about all these different scientific disciplines to
+different scientific disciplines to learn about the applications of the
+learn about the applications of the of computing and the answer is we will
+of computing and the answer is we will try to give you an overview of how these
+try to give you an overview of how these different applications
+different applications are parallelized jim will give you a
+are parallelized jim will give you a couple of lectures that give an overview
+couple of lectures that give an overview of that and we'll talk about
+of that and we'll talk about some of the more specific examples but
+some of the more specific examples but we'll also just try to capture
+we'll also just try to capture the patterns that come up or the motifs
+the patterns that come up or the motifs of parallel computing that come up
+of parallel computing that come up across these applications
+across these applications that will hopefully help you in whatever
+that will hopefully help you in whatever application domain you're working in
+application domain you're working in to understand how it relates to some
+to understand how it relates to some problem that you have seen before in
+problem that you have seen before in this class
+this class so we call these the motifs the original
+so we call these the motifs the original name that was given to these were the
+name that was given to these were the the dwarfs and this was named after uh
+the dwarfs and this was named after uh phil colella
+phil colella used the term the seven dwarfs of
+used the term the seven dwarfs of scientific computing he was really
+scientific computing he was really referring to simulation not
+referring to simulation not data analysis or machine learning and he
+data analysis or machine learning and he was referring to
+was referring to these seven things in the list so dense
+these seven things in the list so dense and sparse linear algebra
+and sparse linear algebra particle methods structured grids
+particle methods structured grids unstructured grids spectral methods
+unstructured grids spectral methods which are things like ffts
+which are things like ffts and monte carlo methods which tend to
+and monte carlo methods which tend to operate
+operate somewhat independently on these
+somewhat independently on these different say randomly selected
+different say randomly selected uh points or values and in this class
+uh points or values and in this class we will study in some detail you'll have
+we will study in some detail you'll have a lecture on at least one lecture
+a lecture on at least one lecture on the first six of these we'll talk a
+on the first six of these we'll talk a little bit more maybe about
+little bit more maybe about monte carlo but not in great detail
+monte carlo but not in great detail because it tends to
+because it tends to not be something that is so challenging
+not be something that is so challenging to parallelize
+to parallelize but each of these have different
+but each of these have different strategies for how you're going to
+strategies for how you're going to parallelize them
+parallelize them and so we'll talk about them in some
+and so we'll talk about them in some detail
+detail now phil actually never wrote this up as
+now phil actually never wrote this up as a paper
+a paper he was giving a talk in 2004 at a darpa
+he was giving a talk in 2004 at a darpa meeting
+meeting and a call and it was on defining the
+and a call and it was on defining the software requirements for scientific
+software requirements for scientific computing and
+computing and and came up with this way of sort of
+and came up with this way of sort of just characterizing them
+just characterizing them which in some sense to people working in
+which in some sense to people working in scientific computing these are all sort
+scientific computing these are all sort of
+of maybe not obvious the the list but but
+maybe not obvious the the list but but yes these are all
+yes these are all common techniques that are used in
+common techniques that are used in scientific simulations
+scientific simulations so in 2006 under
+so in 2006 under dave patterson was leading a project on
+dave patterson was leading a project on par lab that jim demille and i were both
+par lab that jim demille and i were both working on
+working on along with a number of other faculty
+along with a number of other faculty including krista osanovich who
+including krista osanovich who is the lead author on the paper um on
+is the lead author on the paper um on this uh
+this uh this the berkeley view paper which is on
+this the berkeley view paper which is on the view of the parallel computing
+the view of the parallel computing landscape
+landscape and we used the phrase and said motifs
+and we used the phrase and said motifs we no longer had
+we no longer had seven of them although you can see some
+seven of them although you can see some of those same seven in this list we've
+of those same seven in this list we've certainly got you know dense and sparse
+certainly got you know dense and sparse linear algebra spectral methods
+linear algebra spectral methods and body methods we kind of ended up
+and body methods we kind of ended up with this kind of
+with this kind of catch-all map reduce for things that
+catch-all map reduce for things that were independent which is where monte
+were independent which is where monte carlo methods ended up
+carlo methods ended up and but another number of other patterns
+and but another number of other patterns that we found in some of the
+that we found in some of the applications that we felt
+applications that we felt should be characterized here and this
+should be characterized here and this graphics then shows
+graphics then shows how these map onto different application
+how these map onto different application spaces so we were looking at embedded
+spaces so we were looking at embedded computing the spec benchmarks which is a
+computing the spec benchmarks which is a set of standard benchmark databases
+set of standard benchmark databases computer games machine learning which
+computer games machine learning which by the way we didn't know nearly as much
+by the way we didn't know nearly as much about it at that point in time back in
+about it at that point in time back in 2006 in this group at least
+2006 in this group at least and hpc was the modeling and simulation
+and hpc was the modeling and simulation so you can still see those
+so you can still see those those original seven in there and then
+those original seven in there and then we had
+we had some driving applications in the project
+some driving applications in the project health image processing speech and music
+health image processing speech and music as well as browser um and parallelizing
+as well as browser um and parallelizing them
+them we were not looking at high performance
+we were not looking at high performance computers or very large scale
+computers or very large scale parallelism we were looking at
+parallelism we were looking at multi-core parallelism
+multi-core parallelism so things like parallelizing a bro
+so things like parallelizing a bro browser rendering is something that
+browser rendering is something that still might make sense on a multi-core
+still might make sense on a multi-core processor even if it wouldn't make sense
+processor even if it wouldn't make sense on an hpc system but these the this
+on an hpc system but these the this set of the motifs then were an updated
+set of the motifs then were an updated list that came
+list that came that brought in a broader set of
+that brought in a broader set of applications
+applications now not to be outdone in 2013
+now not to be outdone in 2013 in a national academy's report that i
+in a national academy's report that i believe mike
+believe mike jordan was might have been the lead
+jordan was might have been the lead author on or at least leading the study
+author on or at least leading the study group
+group and mike mahoney was also involved with
+and mike mahoney was also involved with both berkeley faculty
+both berkeley faculty they look there was a report called the
+they look there was a report called the frontiers and massive data analysis
+frontiers and massive data analysis and they coined the phrase the seven
+and they coined the phrase the seven giants of data
+giants of data so this looks at um they they decided
+so this looks at um they they decided that big data needed giants a giant
+that big data needed giants a giant motifs
+motifs and so these included basic statistics
+and so these included basic statistics also things that
+also things that can maybe largely be done independently
+can maybe largely be done independently they
+they use something called generalized and body which is looking at all
+and body which is looking at all combinations of pairs of things
+combinations of pairs of things so we'll we'll see that come up a little
+so we'll we'll see that come up a little bit later when ident talks
+bit later when ident talks later in the semester maybe near the end
+later in the semester maybe near the end about computational biology
+about computational biology and uh jim will talk about end body
+and uh jim will talk about end body methods that come up in simulations
+methods that come up in simulations we'll talk about so graph theory which
+we'll talk about so graph theory which is not exactly the same as unstructured
+is not exactly the same as unstructured meshes but have
+meshes but have some of the same characteristics and
+some of the same characteristics and you'll hear about both of those
+you'll hear about both of those uh because they wanted a list of seven
+uh because they wanted a list of seven in keeping with the spirit of the
+in keeping with the spirit of the original seven dwarfs they
+original seven dwarfs they you they collapsed uh sparse and dense
+you they collapsed uh sparse and dense linear algebra into just linear algebra
+linear algebra into just linear algebra then added optimization integration and
+then added optimization integration and alignment
+alignment and so these are algorithms that
+and so these are algorithms that these kinds of patterns that come up in
+these kinds of patterns that come up in data analysis i think to me
+data analysis i think to me what was actually most interesting about
+what was actually most interesting about this list is how similar it was
+this list is how similar it was to the simulation ones rather than how
+to the simulation ones rather than how different it was and in fact i would
+different it was and in fact i would have said that these optimization
+have said that these optimization integration algorithms are perhaps at a
+integration algorithms are perhaps at a higher level
+higher level they're not kind of the building blocks
+they're not kind of the building blocks that we need to think about as much when
+that we need to think about as much when we're paralyzing them
+we're paralyzing them but i also haven't studied some of those
+but i also haven't studied some of those in in as much detail
+in in as much detail alignment is a dynamic programming sort
+alignment is a dynamic programming sort of problem that comes up in genomics as
+of problem that comes up in genomics as well as text analysis
+well as text analysis and that is i think a different pattern
+and that is i think a different pattern so last year
+so last year with a team that included iden and and
+with a team that included iden and and julia gowdy who's one of the gsis for
+julia gowdy who's one of the gsis for the class
+the class put together a paper on the motifs
+put together a paper on the motifs of genomic data analysis but i do think
+of genomic data analysis but i do think these actually come out
+these actually come out a lot in other non-genomic data analysis
+a lot in other non-genomic data analysis problems as well
+problems as well so we kept the dense and sparse linear
+so we kept the dense and sparse linear algebra or matrix operation the
+algebra or matrix operation the generalized n-body
+generalized n-body and the alignment from the national
+and the alignment from the national academies report as well as graphs
+academies report as well as graphs but added hash tables and sorting which
+but added hash tables and sorting which come up all over the place as
+come up all over the place as we will talk about later and so these
+we will talk about later and so these the kinds of applications and
+the kinds of applications and specifically in this exobiome project
+specifically in this exobiome project all of these different styles of
+all of these different styles of parallelization these
+parallelization these these different kinds of algorithms
+these different kinds of algorithms these patterns of parallelism come up
+these patterns of parallelism come up so even though you won't become an
+so even though you won't become an expert in this
+expert in this in every one of the application domains
+in every one of the application domains hopefully you'll get a sense
+hopefully you'll get a sense of how each of these application domains
+of how each of these application domains how
+how what what techniques we use for
+what what techniques we use for parallelizing them throughout the
+parallelizing them throughout the semester
+
+now the um why are the the next thing i want to talk about is why the fastest
+want to talk about is why the fastest computers are parallel computers
+computers are parallel computers including laptops and handheld devices
+including laptops and handheld devices so far i've mostly been talking about
+so far i've mostly been talking about high performance computing
+high performance computing i mentioned that in the par lab project
+i mentioned that in the par lab project we were really interested in multi-core
+we were really interested in multi-core processors
+processors and so there's a trends that say that
+and so there's a trends that say that since about 2005
+since about 2005 really all computers are have been
+really all computers are have been parallel computers
+parallel computers so it's really hard to find a computer
+so it's really hard to find a computer that is not a parallel computer today
+that is not a parallel computer today so that this really looks at now the
+so that this really looks at now the technology trends underneath computing
+technology trends underneath computing and starts with moore's law moore's law
+and starts with moore's law moore's law is really about
+is really about transistor density so this law was
+transistor density so this law was really an observation by gordon moore uh
+really an observation by gordon moore uh the co-founder of
+the co-founder of intel that that transistor density was
+intel that that transistor density was going to continue to double
+going to continue to double roughly every one and a half to two
+roughly every one and a half to two years and we sometimes
+years and we sometimes uh kind of approximate exactly the rate
+uh kind of approximate exactly the rate that he said originally one and a half
+that he said originally one and a half years
+years and so this is called moore's law it's
+and so this is called moore's law it's really about
+really about the transistor density and then the
+the transistor density and then the number translates into the number of
+number translates into the number of transistors on a chip although the chips
+transistors on a chip although the chips do sometimes get larger as well
+do sometimes get larger as well and the microprocessors then that are
+and the microprocessors then that are the processors that are built with them
+the processors that are built with them have become smaller and denser and more
+have become smaller and denser and more powerful
+powerful as you have as you shrink the size of
+as you have as you shrink the size of the transistors
+
+so this this graph looks at the transistor density
+transistor density and the number of transistors and
+and the number of transistors and thousands per chip
+thousands per chip and then the the number of um the
+and then the the number of um the frequency the clock frequency or the
+frequency the clock frequency or the rate at which the processor is running
+rate at which the processor is running and you can see that even in this time
+and you can see that even in this time frame from 1970 to 2000
+frame from 1970 to 2000 the clock speed was not quite keeping up
+the clock speed was not quite keeping up with the transistor
+with the transistor density but it was tracking it pretty
+density but it was tracking it pretty well and we were getting these
+well and we were getting these pretty continuous increases in the
+pretty continuous increases in the performance of the processor
+performance of the processor which came from the faster clock rate so
+which came from the faster clock rate so the just the processor is just running
+the just the processor is just running faster
+faster and if you you know you get a fast a
+and if you you know you get a fast a processor that runs twice as fast
+processor that runs twice as fast your hopefully your application you
+your hopefully your application you don't really have to do anything to it
+don't really have to do anything to it it's going to roughly run twice as fast
+it's going to roughly run twice as fast now where did what where did that speed
+now where did what where did that speed come from
+come from well it came from the fact that you're
+well it came from the fact that you're shrinking the transistors or what's
+shrinking the transistors or what's called the feature size
+called the feature size in the chip space and that meant that
+in the chip space and that meant that the clock rate
+the clock rate goes up by the same factor roughly
+goes up by the same factor roughly speaking because the wires are shorter
+speaking because the wires are shorter so you can clock everything faster
+so you can clock everything faster because the speed of light doesn't take
+because the speed of light doesn't take as
+you don't need as long to get those electrical
+electrical pulses and things across some piece of
+pulses and things across some piece of the chip because it's it's a shorter
+the chip because it's it's a shorter distance and so it just
+distance and so it just goes up um linearly now it's going to be
+goes up um linearly now it's going to be a little bit less than x
+a little bit less than x and that has to do with power
+and that has to do with power consumption but in addition to that
+consumption but in addition to that the fact that the the clock is going to
+the fact that the the clock is going to be higher is we got more transistors
+be higher is we got more transistors by a factor of x squared with this
+by a factor of x squared with this feature size the feature sizes in one
+feature size the feature sizes in one dimension
+dimension and the die size then also as i said
+and the die size then also as i said increased over time
+increased over time almost by a factor of x in many cases
+almost by a factor of x in many cases and so we would get almost a factor of x
+and so we would get almost a factor of x to the fourth in terms of the raw
+to the fourth in terms of the raw computing power
+computing power these these are now very round sort of
+these these are now very round sort of estimates but we'll get typically
+estimates but we'll get typically a factor of x to the third devoted to
+a factor of x to the third devoted to either parallelism or locality
+either parallelism or locality so some programs would even get you know
+so some programs would even get you know x to the
+x to the x cubed times faster without changing
+x cubed times faster without changing them on one of these systems you would
+them on one of these systems you would you need by the way the caches
+you need by the way the caches the memory system as well as the faster
+the memory system as well as the faster clock rate to get those kinds of
+clock rate to get those kinds of increases
+
+how fast can we make one of these serial computers so this is just a back
+computers so this is just a back of the um the uh
+of the um the uh um how fast the um
+um how fast the um how fast can we make a single serial
+how fast can we make a single serial computer so let's say we want to build a
+computer so let's say we want to build a teraflop computer
+teraflop computer and we wanted to have a terabyte of
+and we wanted to have a terabyte of memory in order to do something
+memory in order to do something interesting with that teraflop of
+interesting with that teraflop of performance
+performance but we want it to be a sequential
+but we want it to be a sequential machine so if we consider this
+machine so if we consider this teraflop so that's 10 to the 12th c
+teraflop so that's 10 to the 12th c floating point operations per second
+floating point operations per second and the data has to travel some distance
+and the data has to travel some distance r to get
+r to get from the memory to the processor and
+from the memory to the processor and back again so we can read
+back again so we can read something out of the memory that
+something out of the memory that distance are in order to keep up with
+distance are in order to keep up with that 10 to the 12th
+that 10 to the 12th times per second remember this is a
+times per second remember this is a single serial computer
+single serial computer it has to and we take into account the
+it has to and we take into account the speed of light
+speed of light then that that chip has to be or the
+then that that chip has to be or the distance r between memory and the
+distance r between memory and the processor has to be
+processor has to be about a third of a millimeter so now
+about a third of a millimeter so now we've got to take a terabyte of memory
+we've got to take a terabyte of memory and squeeze it into a third of a
+and squeeze it into a third of a millimeter by 30 millimeters squared
+millimeter by 30 millimeters squared and that means that each bit bit can
+and that means that each bit bit can occupy about an angstrom which is about
+occupy about an angstrom which is about the size of a small atom
+the size of a small atom so that gives us it gives you an idea
+so that gives us it gives you an idea that
+that we're just not going to be able to build
+we're just not going to be able to build a um
+a um we're not going to be able to build this
+we're not going to be able to build this kind of teraflop computer
+kind of teraflop computer because we can't squeeze all of that
+because we can't squeeze all of that terabyte of memory
+terabyte of memory into a into this by building a memory
+into a into this by building a memory cell out of a single atom so he really
+cell out of a single atom so he really had no choice at some level
+had no choice at some level but to go to parallelism
+but to go to parallelism the thing that caught up with us even
+the thing that caught up with us even before that was heat and this is a
+before that was heat and this is a i think hopefully simulated picture of
+i think hopefully simulated picture of what happens when you put leave a laptop
+what happens when you put leave a laptop on your lap
+on your lap a little bit too long and um obviously
+a little bit too long and um obviously there's a lot of heat density in these
+there's a lot of heat density in these computers if you've got a
+computers if you've got a graphics processing unit at home you've
+graphics processing unit at home you've got maybe a high-end gaming system or
+got maybe a high-end gaming system or something like that you know that those
+something like that you know that those are even hotter they use more power
+are even hotter they use more power they need fans to cool them that are
+they need fans to cool them that are more maybe liquid cooling
+more maybe liquid cooling not just the kind of fan that might be
+not just the kind of fan that might be in your laptop
+in your laptop so this is a also now famous plot that
+so this is a also now famous plot that was put together
+was put together by a group at intel looking at how hot
+by a group at intel looking at how hot the chips were getting
+the chips were getting this is also back in you know pre 2010
+this is also back in you know pre 2010 they were
+from 1970 going forward and they were looking at approaching things like
+looking at approaching things like you know hot plates they'd they'd
+you know hot plates they'd they'd already reached a hot plate they were
+already reached a hot plate they were getting to you know nuclear reactor
+getting to you know nuclear reactor rocket nozzle in the sun's surface up
+rocket nozzle in the sun's surface up here
+here if that sort of growth in the uh single
+if that sort of growth in the uh single processor clock speed
+processor clock speed it continued and the reason for that has
+it continued and the reason for that has to do with the power
+to do with the power consumption being proportional to the
+consumption being proportional to the voltage the
+voltage the supply voltage squared times the clock
+supply voltage squared times the clock frequency times the capacitance
+frequency times the capacitance so without going into details about all
+so without going into details about all of this let's just say that you get
+of this let's just say that you get more of a cubic effect rather than
+more of a cubic effect rather than getting a linear effect when you try to
+getting a linear effect when you try to increase
+increase the the frequency because you also need
+the the frequency because you also need to increase the supply voltage
+to increase the supply voltage whereas if you just increase the number
+whereas if you just increase the number of
+of processors on this chip so we still have
+processors on this chip so we still have our we got our technology shrinking from
+our we got our technology shrinking from moore's law we got a lot more
+moore's law we got a lot more transistors on the chip
+transistors on the chip but rather than using it to in boost the
+but rather than using it to in boost the frequency
+frequency we're going to add more cores that
+we're going to add more cores that increases the capacitance but it's only
+increases the capacitance but it's only a linear factor
+a linear factor the other problem that we had and
+the other problem that we had and there's a lot of feeling that in the
+there's a lot of feeling that in the early 2000s the serial processors were
+early 2000s the serial processors were really over engineered
+really over engineered that is they were really looking at they
+that is they were really looking at they were trying to
+were trying to make serial programs run as fast as
+make serial programs run as fast as possible by doing things like
+possible by doing things like speculative execution dynamic dependence
+speculative execution dynamic dependence and
+power and so we were putting more getting more transistors
+putting more getting more transistors but we were
+but we were they were getting too hot and we weren't
+they were getting too hot and we weren't getting all of the benefits of them
+
+so the other problem that came up is the yield of the processors this is a fairly
+yield of the processors this is a fairly simple argument i won't go into the
+simple argument i won't go into the details here
+details here except to say that if you're putting a
+except to say that if you're putting a lot of transistors on a chip
+lot of transistors on a chip the chance that one of those transistors
+the chance that one of those transistors will be bad increases
+will be bad increases if you're making one really big huge
+if you're making one really big huge processor out of it and one of those
+processor out of it and one of those transistors doesn't work
+transistors doesn't work then that whole chip may have to be
+then that whole chip may have to be thrown out whereas if you put
+thrown out whereas if you put say 68 cores or maybe 72 cores and you
+say 68 cores or maybe 72 cores and you don't tell anybody about the last four
+don't tell anybody about the last four of them
+of them on something like the the nice landing
+on something like the the nice landing processor
+processor you if you lose one of those cores you
+you if you lose one of those cores you can still sell that as a chip with maybe
+can still sell that as a chip with maybe 64 cores or maybe
+64 cores or maybe 60 cores or whatever and so you're the
+60 cores or whatever and so you're the the cost
+the cost in terms of manufacturing them goes way
+in terms of manufacturing them goes way up when you have to throw out a lot of
+up when you have to throw out a lot of those chips
+those chips so this is really what moore's law and
+so this is really what moore's law and then the related
+then the related laws look like today so we were still
+laws look like today so we were still have still been getting
+have still been getting some of the increasing transistor
+some of the increasing transistor density those of you who read the news
+density those of you who read the news about this or
+about this or our experts on the hardware know that
+our experts on the hardware know that we're also about to
+we're also about to run into the end of moore's law in fact
+run into the end of moore's law in fact the itrs
+the itrs road map that was the last one that was
+road map that was the last one that was published in 2015
+published in 2015 said that it would end in 2021 that
+said that it would end in 2021 that moore's law would end it probably won't
+moore's law would end it probably won't be quite that abrupt but we're seeing
+be quite that abrupt but we're seeing things slowing down for sure
+things slowing down for sure the single processor thread performance
+the single processor thread performance here in green you can see really leveled
+here in green you can see really leveled off here around 2004
+off here around 2004 maybe 2005. and the frequency
+maybe 2005. and the frequency um the sorry the the frequency actually
+um the sorry the the frequency actually really leveled off here in 2004
+really leveled off here in 2004 we were still getting a little bit more
+we were still getting a little bit more single thread performance by using some
+single thread performance by using some clever tricks inside of there
+clever tricks inside of there some of the things that i mentioned that
+some of the things that i mentioned that do consume energy but we're getting us a
+do consume energy but we're getting us a little bit bigger boost in serial
+little bit bigger boost in serial performance of applications
+performance of applications but the number of cores is really what's
+but the number of cores is really what's replaced this so
+replaced this so the yellow here at the bottom shows that
+the yellow here at the bottom shows that the number of cores has now been growing
+the number of cores has now been growing exponentially as the transistor density
+exponentially as the transistor density is increased instead of
+is increased instead of instead of the clock rate and by the way
+instead of the clock rate and by the way what this meant is that people have a
+what this meant is that people have a tendency
+tendency to under underestimate
+to under underestimate exponential improvements in things but
+exponential improvements in things but they've also had a hard time
+they've also had a hard time stopping to think about stopping these
+stopping to think about stopping these exponential growth rates
+exponential growth rates the atlas experiment which is one of the
+the atlas experiment which is one of the experiments of the large hadron collider
+experiments of the large hadron collider reportedly under predicted the cost of
+reportedly under predicted the cost of their computing for the upgraded large
+their computing for the upgraded large hadron collider by a billion dollars
+hadron collider by a billion dollars because they were expecting these
+because they were expecting these performance increases
+performance increases of computers to continue and they really
+of computers to continue and they really leveled off and a lot of that code was
+leveled off and a lot of that code was not highly parallel
+
+so moore's law reinterpreted says we're going to have an increasing number of
+going to have an increasing number of cores
+cores not faster clock speeds and we're going
+not faster clock speeds and we're going to have to deal with systems that have
+to have to deal with systems that have up to a million way concurrency and
+up to a million way concurrency and you've already seen that certainly in
+you've already seen that certainly in the hpc systems
+the hpc systems and we'll have to deal with internship
+and we'll have to deal with internship as well as
+as well as intra-chip level parallelism which we're
+intra-chip level parallelism which we're certainly doing today
+certainly doing today and the interest as i said the um
+and the interest as i said the um industry consortium so those said that
+industry consortium so those said that moore's law
+moore's law um even that law is not going to
+um even that law is not going to continue forever um
+continue forever um and what we're going to have to deal
+and what we're going to have to deal with the
+with the the end of that as well in the next few
+the end of that as well in the next few years and
+years and certainly people are looking at other
+certainly people are looking at other things like three-dimensional chips and
+things like three-dimensional chips and and so on stacking
+and so on stacking and other techniques to try to continue
+and other techniques to try to continue some of the uh growth in computing
+some of the uh growth in computing performance
+performance but certainly things are going to be
+but certainly things are going to be going to be harder
+going to be harder in the future so this is this means that
+in the future so this is this means that parallel hardware is everywhere
+parallel hardware is everywhere this is the nice landing processor in
+this is the nice landing processor in the quarry
+the quarry k l partition the haswell processor
+k l partition the haswell processor that's in the other part of quarry
+that's in the other part of quarry the amd and nvidia and there's the
+the amd and nvidia and there's the fujitsu arm processor that's in the
+fujitsu arm processor that's in the fugaku system
+fugaku system and even a cell phone is going to have a
+and even a cell phone is going to have a parallel processor inside of it today
+parallel processor inside of it today so even if you're not interested in high
+so even if you're not interested in high performance parallel computer and
+performance parallel computer and computing in this course you're going to
+computing in this course you're going to be learning about a parallel computing
+be learning about a parallel computing that is um that you can't really escape
+that is um that you can't really escape now one cautionary note about
+now one cautionary note about parallelism is amdahl's law
+parallelism is amdahl's law and amdahl's law says that if we i can
+and amdahl's law says that if we i can only speed up a piece of the application
+only speed up a piece of the application for example using parallelism it's true
+for example using parallelism it's true with any kind of
+with any kind of uh thing the optimization we're going to
+uh thing the optimization we're going to do on the the um
+do on the the um to the application if i can only speed
+to the application if i can only speed up the fraction
+up the fraction s of the running time so s is a fraction
+s of the running time so s is a fraction of the total time it took to run that
+of the total time it took to run that sequentially and so one minus s is the
+sequentially and so one minus s is the uh sorry s is the piece that can only be
+uh sorry s is the piece that can only be done sequentially that i don't try to
+done sequentially that i don't try to parallelize or speed up
+parallelize or speed up and one minus s then is the
+and one minus s then is the parallelizable piece and p
+parallelizable piece and p is the number of processors our speed up
+is the number of processors our speed up of p
+of p is going to be fundamentally limited by
+is going to be fundamentally limited by 1 over s
+1 over s that is the fraction of the that
+that is the fraction of the that parallel
+parallel the amount of time that you spend doing
+the amount of time that you spend doing the fraction parallel work
+the fraction parallel work so for example if you're if one one
+so for example if you're if one one tenth of your code
+tenth of your code is serial and you parallelize the heck
+is serial and you parallelize the heck out of everything else in the code the
+out of everything else in the code the other nine tenths of the code
+other nine tenths of the code you may feel like that's you're doing
+you may feel like that's you're doing pretty well but in fact
+pretty well but in fact if you're running on thousands of
+if you're running on thousands of processor cores like on all of corey of
+processor cores like on all of corey of the 65
+the 65 000 cores your maximum speed up will be
+000 cores your maximum speed up will be 10x because you're gonna be limited by
+10x because you're gonna be limited by that that
+that that one tenth of the code i think i'll skip
+one tenth of the code i think i'll skip this in order to
+this in order to make sure i talk about some of the
+make sure i talk about some of the course logistics but there's some more
+course logistics but there's some more hardware trends here
+hardware trends here so let's talk about who's who and what's
+so let's talk about who's who and what's what in cs267
+what in cs267 so here's my team and um i don't
+so here's my team and um i don't know if people can show their videos
+know if people can show their videos um maybe everybody can we can i'm sure
+um maybe everybody can we can i'm sure okay go ahead and you want to introduce
+okay go ahead and you want to introduce yourself but
+yourself but it was on by default it used to be i
+it was on by default it used to be i don't know am i visible by any chance
+don't know am i visible by any chance yes uh no you're not on your video's
+yes uh no you're not on your video's going on
+going on there you're on how about now okay i
+there you're on how about now okay i must have
+must have clicked the button twice um i'm adam
+clicked the button twice um i'm adam bullick i'm
+bullick i'm a adjunct faculty at ex and a
+a adjunct faculty at ex and a scientist at blowsburg international
+scientist at blowsburg international laboratory up at the hill which i'm
+laboratory up at the hill which i'm actually seeing right now
+actually seeing right now i will be mostly teaching the
+i will be mostly teaching the programming lectures on openmp as well
+programming lectures on openmp as well as mpi
+as mpi also machine learning graph processing
+also machine learning graph processing graph partitioning
+graph partitioning and computational biology and these
+and computational biology and these happen to be
+happen to be most of my research anyway
+most of my research anyway great jim do you want to introduce
+great jim do you want to introduce yourself hi i'm jim demmel
+yourself hi i'm jim demmel i'm a professor in math and computer
+i'm a professor in math and computer science and i look forward to
+science and i look forward to teaching you about the some of the
+teaching you about the some of the motifs in particular the linear algebra
+motifs in particular the linear algebra and also where the all the other motifs
+and also where the all the other motifs come from
+come from great uh julia
+great uh julia hi i'm julia and i'm a pitch student of
+hi i'm julia and i'm a pitch student of the third year
+the third year working with katie and aiden and my
+working with katie and aiden and my research is about
+research is about high performance computing and
+high performance computing and computational genomics
+computational genomics great a look oops sorry i think you're
+great a look oops sorry i think you're next
+next hi everyone my name is melly ellibol and
+hi everyone my name is melly ellibol and i'm a fourth year phd student working
+i'm a fourth year phd student working with yonsoica and michael jordan
+with yonsoica and michael jordan and my research currently is on
+and my research currently is on running linear algebra on distributed
+running linear algebra on distributed systems
+systems okay great analog hi
+okay great analog hi i'm alok i'm a second year phd with
+i'm alok i'm a second year phd with kathy and ayden i
+kathy and ayden i study accelerating graph representation
+study accelerating graph representation learning on large scale supercomputers
+learning on large scale supercomputers i'm looking forward to the course great
+i'm looking forward to the course great thank you everybody so who else is in
+thank you everybody so who else is in the class who are all of you
+the class who are all of you i got 106 people i guess online i think
+i got 106 people i guess online i think a few more people are going to watch the
+a few more people are going to watch the lecture later
+lecture later we are recording the lectures and
+we are recording the lectures and everything is available on the website
+everything is available on the website you should be able to access it through
+you should be able to access it through your berkeley.edu youtube account
+your berkeley.edu youtube account or and and whoops sorry um
+or and and whoops sorry um but this is what the course the makeup
+but this is what the course the makeup of the class looks like right now
+of the class looks like right now we have almost three quarters are either
+we have almost three quarters are either computer science or eecs students
+computer science or eecs students and then we've got people from all
+and then we've got people from all across campus and math and statistics
+across campus and math and statistics earth and planetary and sciences and so
+earth and planetary and sciences and so on mostly graduate students right now
+on mostly graduate students right now there's about 11 undergrads and i think
+there's about 11 undergrads and i think another about 20 that are trying to get
+another about 20 that are trying to get into the course
+into the course we do expect to let all of you who are
+we do expect to let all of you who are currently on our internal wait list
+currently on our internal wait list if you've sent us mail into the class
+if you've sent us mail into the class we're waiting to get the codes i think
+we're waiting to get the codes i think the staff that
+the staff that make those codes up for us have just
+make those codes up for us have just been overwhelmed with some of the
+been overwhelmed with some of the larger courses we can't take an
+larger courses we can't take an unlimited number of undergraduates so
+unlimited number of undergraduates so don't go and tell all of your friends
+don't go and tell all of your friends but i think that
+but i think that everybody that's currently on the
+everybody that's currently on the waitlist can get in if you would like to
+
+this course is also being broadcast in um
+um currently the 2018 lectures are being
+currently the 2018 lectures are being used for this class but
+used for this class but in future years we think this this
+in future years we think this this lecture that we're recording today and
+lecture that we're recording today and the rest that we'll be using this
+the rest that we'll be using this semester
+semester the um are used by an nsf project the
+the um are used by an nsf project the exceed project to teach people
+exceed project to teach people all over the country and in some cases
+all over the country and in some cases all over the world about parallel
+all over the world about parallel computing
+computing so this just shows you all of the some
+so this just shows you all of the some of the other universities that have used
+of the other universities that have used these uh these lectures and the homework
+these uh these lectures and the homework assignments and everything
+assignments and everything so just a little outline for the the
+so just a little outline for the the course
+course we'll talk about different programming
+we'll talk about different programming models per
+models per um ship for shared memory for
+um ship for shared memory for distributed memory and for
+distributed memory and for data parallelism and we'll talk about
+data parallelism and we'll talk about parallelism strategies or these motifs
+parallelism strategies or these motifs and in that we'll talk about some of the
+and in that we'll talk about some of the applications that come up
+applications that come up and we will also talk about what we'll
+and we will also talk about what we'll focus on those original six as well as
+focus on those original six as well as the
+the the some of the data analytics ones and
+um then on the right hand you see some of the other things that we'll be
+of the other things that we'll be talking about
+talking about throughout the course we've talked a
+throughout the course we've talked a little bit today about moore's law and
+little bit today about moore's law and amdahl's law
+amdahl's law that we'll hear more about a number of
+that we'll hear more about a number of other other kind of cross-cutting themes
+other other kind of cross-cutting themes as well as some lectures specifically on
+as well as some lectures specifically on biology
+biology specifically on applications including
+specifically on applications including machine learning
+machine learning uh biology and cosmology so
+uh biology and cosmology so i think with that this is the course
+i think with that this is the course website once again
+website once again the homeworks will be there the slides
+the homeworks will be there the slides will be there we do want you as soon as
+will be there we do want you as soon as possible to fill out a survey
+possible to fill out a survey we'll be using that to put together
+we'll be using that to put together homework groups so
+homework groups so uh please fill that out and we are also
+uh please fill that out and we are also asking you to take a quiz after every
+asking you to take a quiz after every lecture
+lecture those quizzes are due right before the
+those quizzes are due right before the the lecture
+the lecture so in this case on thursday before
+so in this case on thursday before thursday's lecture you need to take the
+thursday's lecture you need to take the quiz on today's lecture
+quiz on today's lecture and similarly on thursday you need that
+and similarly on thursday you need that that quiz you have to take before the
+that quiz you have to take before the following tuesday
+following tuesday we will be assigning you to groups for
+we will be assigning you to groups for homework one
+homework one what our experience in the past is these
+what our experience in the past is these groups sometimes persist through the end
+groups sometimes persist through the end of the semester but after the first
+of the semester but after the first homework you can
+homework you can choose your own groups there's of course
+choose your own groups there's of course a piazza page
+a piazza page and last i will just point out we are
+and last i will just point out we are running this like a graduate course we
+running this like a graduate course we do
+expect people will do their own work you are required to turn in your own work
+are required to turn in your own work even if you find things on the internet
+even if you find things on the internet we also ask that you not
+we also ask that you not put solutions on the internet um we have
+put solutions on the internet um we have tried a locus has gone to a lot of work
+tried a locus has gone to a lot of work to try to remove some of the solutions
+to try to remove some of the solutions that were there
+that were there but if you happen to find something um
+but if you happen to find something um just know that the expectation is that
+just know that the expectation is that you do your own work regardless of
+you do your own work regardless of what you might be able to find on the
+what you might be able to find on the internet
+internet so let me just see if there are i think
+so let me just see if there are i think that was the last
+that was the last yes there are any questions and um
+yes there are any questions and um uh the excel on the website is not
+uh the excel on the website is not visible so we will go ahead and fix that
+visible so we will go ahead and fix that um the the links to the lecture notes
+um the the links to the lecture notes are there and the links to the video
+are there and the links to the video will be there
+will be there probably by the end of the day today so
+probably by the end of the day today so we'll try to get those out within
+we'll try to get those out within a few hours of the lecture sometimes it
+a few hours of the lecture sometimes it takes a little bit
+takes a little bit a little bit longer all right thanks
+a little bit longer all right thanks very much everyone
+very much everyone and we look forward to the semester with
+and we look forward to the semester with all of you
+all of you and stay healthy and maybe you will get
+and stay healthy and maybe you will get to be in a classroom at some point in
+to be in a classroom at some point in the future but for now we will be doing
+the future but for now we will be doing everything online and more information
+everything online and more information on piazza and things like that for the
+on piazza and things like that for the logistics thanks a lot
