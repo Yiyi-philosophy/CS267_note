@@ -2,7 +2,7 @@
 
 > Course Website: https://sites.google.com/lbl.gov/cs267-spr2021/pre-proposal
 
-## P1:
+## P1: Introduction & Overview
 
 Note:
 1. load imbalance = inefficient
@@ -30,13 +30,13 @@ Note:
 	- **7 Dwarfs of Simulation**:  Monte Carlo method & Particle methods & Unstructured meshes & Dense Linear Algebra & Sparse Linear Algebra &  Spectral methods &  Structured Meshes.
 11. Limitation of HPC: 
     - Space limitation: Single Chip :  
-        - $r < c / 10^{12} $
+        - $ r < c / 10^{12} $
     - Heat limitation: $Power \propto  V^2fC$
 12. Reinterpreted Moore's law
 
 ---
 
-## P2
+## P2: Memory Hierarchies and Matrix Multiplication
 
 ### Performance programming on uniprocessors requires 
 
@@ -79,11 +79,20 @@ Note:
   - Exploit Multiple registers
   - Minimize Pointer Updates
 
+> This is my understanding of the optimization of matrix multiplication later:
+>
+> - Face a problem about Matrix multiplication in fast and slow memory.
+> - First, she defined the number of operations in fast and slow memory and computation intensity(CI) which is to evaluate the performance of algorithm. 
+> - Then, simplified Matrix multiplication to Matrix-Vector multiplication, and analysis this problem to get the CI=2. 
+> - After that, she analysis Naive Matrix multiply and get the CI=2.
+> - Due to Multiplication properties of partitioned matrices, she put forward Blocked(Tiled) Matrix multiply and get the CI=b(b*b is the size of partitioned matrices).
+> - This small partitioned matrices can take advantage of cache in read and write, using SIMD in computation, thus get better performance.
+
 ---
 
 ## P3
 
-ab
+
 
 
 
