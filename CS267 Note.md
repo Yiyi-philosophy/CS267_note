@@ -78,7 +78,9 @@ Note:
   - Exploit Multiple registers
   - Minimize Pointer Updates
 
-> This is my understanding of the optimization of matrix multiplication later:
+![2022-07-03T09_47_08](CS267 Note.assets/2022-07-03T09_47_08.png)
+
+> **This is my understanding of the optimization of matrix multiplication later**:
 >
 > - Face a problem about Matrix multiplication in fast and slow memory.
 > - First, she defined the number of operations in fast and slow memory and computation intensity(CI) which is to evaluate the performance of algorithm. 
@@ -89,11 +91,74 @@ Note:
 
 ---
 
-## P3
+## P3: Cache Oblivious MatMul and the Roofline Model
 
+- Matrix matrix multiplication
 
+  - Computational intensity O(2n^3) flops on O(3n^2) data 
 
+- Tiling matrix multiplication (cache aware)
 
+  - Can increase to b if b*b blocks fit in fast memory
 
+  - b = sqrt(M/3), the fast memory size M
+
+  - Tiling (aka blocking) “cache-aware”
+
+  - **Cache-oblivious** - recursive
+
+  - ```C
+    Define C = RMM (A, B, n)
+    if (n==1) { 
+        C00 = A00 * B00 ; 
+    } else{ 
+        C00 = RMM (A00 , B00 , n/2) + RMM (A01 , B10 , n/2)
+    	C01 = RMM (A00 , B01 , n/2) + RMM (A01 , B11 , n/2)
+    	C10 = RMM (A10 , B00 , n/2) + RMM (A11 , B10 , n/2)
+    	C11 = RMM (A11 , B01 , n/2) + RMM (A11 , B11 , n/2) 
+    } 
+    return C
+    ```
+
+  - $CI=f/m=2n^3/O(n^3/\sqrt{M})=O(\sqrt{M})$
+
+  - **Don’t need to know M for this to work!**
+
+- Optimized libraries (BLAS) exist
+
+  - Flop/s:	MM(BLAS3) > MV(BLAS2)  ->  Compute Bound
+  - Time:      MM(BLAS3) < MV(BLAS2)   -> Bandwidth Bound
 
 ​     
+
+![image-20220704193219190](CS267 Note.assets/image-20220704193219190.png)
+
+
+
+- Roofline captures upper bound **performance**
+
+  - The min of 2 upper bounds for a machine
+    - Peak flops (or other arith ops)
+    - Memory bandwidth max
+  - Algorithm computational intensity
+    - Usually defined as best case, infinite cache
+  - Machine balance： 
+    - Balance = (Peak DP FLOP/s) / Peak Bandwidth
+  - Computational / arithmetic intensity:  
+    - CI = FLOPs Performed / Data Moved
+
+- Originally for single processors and SPMs
+
+  - | Operation | FLOPs        | Data     | CI          |
+    | --------- | ------------ | -------- | ----------- |
+    | Dot Prod  | $O(n)$       | $O(n)$   | $O(1)$      |
+    | Mat Vec   | $O(n^2)$     | $O(n^2)$ | $O(1)$      |
+    | MatMul    | $O(n^3)$     | $O(n^2)$ | $O(n)$      |
+    | N-Body    | $O(n^2)$     | $O(n)$   | $O(n)$      |
+    | FFT       | $O(n\log n)$ | $O(n)$   | $O(\log n)$ |
+
+    
+
+- Widely used in practice and adapted to any bandwidth/compute limit situation
+
+![image-20220704194508269](CS267 Note.assets/image-20220704194508269.png)
