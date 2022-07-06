@@ -66,6 +66,8 @@ Note:
   - Naive: $q=f/m=2n^3/(n^3+3n^2) \approx  2$
   - Block: $q=f/m=2n^3/((2N+2)\times n^2)\approx n/N=b$
 
+![image-20220704203534899](CS267 Note.assets/image-20220704203534899.png)
+
 ### Blocking (tiling) is a basic approach to increase q 
 
 - Techniques apply generally, but the details (e.g., block size) are architecture dependent 
@@ -92,6 +94,8 @@ Note:
 ---
 
 ## P3: Cache Oblivious MatMul and the Roofline Model
+
+### Cache Oblivious MatMul
 
 - Matrix matrix multiplication
 
@@ -133,7 +137,7 @@ Note:
 
 ![image-20220704193219190](CS267 Note.assets/image-20220704193219190.png)
 
-
+### Roofline Model
 
 - Roofline captures upper bound **performance**
 
