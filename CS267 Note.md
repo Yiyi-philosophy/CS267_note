@@ -166,3 +166,43 @@ Note:
 - Widely used in practice and adapted to any bandwidth/compute limit situation
 
 ![image-20220704194508269](CS267 Note.assets/image-20220704194508269.png)
+
+
+
+---
+
+## P4: 
+
+- Programming shared memory machines
+  - May allocate data in large shared region without too many worries about 
+    where
+  - Memory hierarchy is critical to performance 
+    - Even more so than on uniprocessors, due to coherence traffic
+  - **For performance tuning, watch sharing (both true and false)**
+- Semantics
+  - Need to lock access to shared variable for read-modify-write
+  - Sequential consistency is the natural semantics
+    - Write race-free programs to get this
+  - Architects worked hard to make this work
+    - Caches are coherent with buses or directories
+    - Cache:
+      - write back: Update when evicted from cache
+      - write through: Update always when wrote
+    - No caching of remote data on shared address space machines
+  - But compiler and processor may still get in the way
+    - Non-blocking writes, read prefetching, code motion…
+    - Avoid races or use machine-specific fences carefully
+
+![image-20220707145549190](CS267 Note.assets/image-20220707145549190.png)
+
+### Original Serial pi program with 100000000 steps
+
+| threads | 1st SPMD | 1st SPMD padded | SPMD critical | PI Loop and reduction |
+| ------- | -------- | --------------- | ------------- | --------------------- |
+| 1       | 1.86     | 1.86            | 1.87          | 1.91                  |
+| 2       | 1.03     | 1.01            | 1.00          | 1.02                  |
+| 3       | 1.08     | 0.69            | 0.68          | 0.80                  |
+| 4       | 0.97     | 0.53            | 0.53          | 0.68                 |
+
+
+
