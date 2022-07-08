@@ -13,7 +13,7 @@ Note:
     2. **HPC**: High performance Computing or distribute memory
     3. **SIMD**: Single Instruction Multiple Data
 4. Different between **Concurrency** & **Parallelism** : logical & actual
-5. **Goal**: Exa-flop = 10^18 flop/s
+5. **Goal**: Exa-flop = 10^18 flop/s -GPU 
 6. Top 500 Project
 
     1. Yardstick: Linpack -> Solve $Ax=b$
@@ -31,6 +31,7 @@ Note:
 12. Limitation of HPC: 
     - Space limitation: Single Chip: $r < c / 10^{12}$
     - Heat limitation: $Power \propto  V^2fC$
+    - V-f 
 13. Reinterpreted Moore's law
 
 ---
@@ -54,10 +55,10 @@ Note:
 
 -  Two ratios are key to efficiency (relative to peak) 
 
-1. Computational intensity of the algorithm:  
+1. **Computational intensity** of the algorithm:  
    - q = f/m = # floating point operations / # slow memory references 
 
-2. Machine balance in the memory system:  
+2. **Machine balance** in the memory system:  
    - tm/tf = time for slow memory reference / time for floating point operation 
 
 ### Want $q > t_m/t_f$ to get half machine peak 
@@ -85,11 +86,11 @@ Note:
 > **This is my understanding of the optimization of matrix multiplication later**:
 >
 > - Face a problem about Matrix multiplication in fast and slow memory.
-> - First, she defined the number of operations in fast and slow memory and computation intensity(CI) which is to evaluate the performance of algorithm. 
+> - First, defined the number of operations in fast and slow memory and computation intensity(CI) which is to evaluate the performance of algorithm. 
 > - Then, simplified Matrix multiplication to Matrix-Vector multiplication, and analysis this problem to get the CI=2. 
-> - After that, she analysis Naive Matrix multiply and get the CI=2.
+> - After that, analysized Naive Matrix multiply and get the CI=2.
 > - Due to Multiplication properties of partitioned matrices, she put forward Blocked(Tiled) Matrix multiply and get the CI=b(b*b is the size of partitioned matrices).
-> - This small partitioned matrices can take advantage of cache in read and write, using SIMD in computation, thus get better performance.
+> - This small partitioned matrices can take advantage of **cache** in read and write, using SIMD in computation, thus get better performance.
 
 ---
 
@@ -136,6 +137,10 @@ Note:
 ​     
 
 ![image-20220704193219190](CS267 Note.assets/image-20220704193219190.png)
+
+- **MM - 3b^3<M + Block**
+- **Z- morton** 
+- **Cache-oblivious**
 
 ### Roofline Model
 

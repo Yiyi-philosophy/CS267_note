@@ -4,7 +4,7 @@ Note of BK CS267
 - [x] Lecture 1: Introduction & Overview
 - [x] Lecture 2: Memory Hierarchies and Matrix Multiplication
 - [x] Lecture 3: More MatMul and the Roofline Performance Model
-- [ ] Lecture 3: Shared Memory Parallelism
+- [x] Lecture 3: Shared Memory Parallelism
 - [ ] Lecture 5: Sources of Parallelism and Locality (Part 1)
 - [ ] Lecture 6: Sources of Parallelism and Locality (Part 2)
 - [ ] Lecture 6: Communication-avoiding matrix multiplication
