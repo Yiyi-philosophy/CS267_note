@@ -5,13 +5,13 @@ Note of BK CS267
 - [x] Lecture 2: Memory Hierarchies and Matrix Multiplication
 - [x] Lecture 3: More MatMul and the Roofline Performance Model
 - [x] Lecture 3: Shared Memory Parallelism
-- [ ] Lecture 5: Sources of Parallelism and Locality (Part 1)
-- [ ] Lecture 6: Sources of Parallelism and Locality (Part 2)
-- [ ] Lecture 6: Communication-avoiding matrix multiplication
-- [ ] Lecture 7: An Introduction to CUDA and Graphics Processors (GPUs)
-- [ ] Lecture 8: Data Parallel Algorithms (aka, tricks with trees)
+- [x] Lecture 5: Sources of Parallelism and Locality (Part 1)
+- [x] Lecture 6: Sources of Parallelism and Locality (Part 2)
+- [x] Lecture 6: Communication-avoiding matrix multiplication
+- [x] Lecture 7: An Introduction to CUDA and Graphics Processors (GPUs)
+- [x] Lecture 8: Data Parallel Algorithms (aka, tricks with trees)
 - [ ] Lecture 9: Distributed Memory Machines and Programming
-- [ ] Lecture 10: Advanced MPI and Collective Communication Algorithms
+- [ ] Lecture 10: Advanced **MPI** and Collective Communication Algorithms ->AIsys 4,5
 - [ ] Lecture 11: UPC++: Partitioned Global Address Space Languages
 - [ ] Lecture 12a: Parallel Algorithms for De Novo Genome Assembly
 - [ ] Lecture 12b: Communication-Avoiding Graph Neural Networks
