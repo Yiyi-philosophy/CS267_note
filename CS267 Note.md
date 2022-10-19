@@ -2,7 +2,7 @@
 
 > Course Website: https://sites.google.com/lbl.gov/cs267-spr2021/pre-proposal
 
-## P1: Introduction & Overview
+# P1: Introduction & Overview
 
 Note:
 1. load imbalance = inefficient
@@ -36,7 +36,7 @@ Note:
 
 ---
 
-## P2: Memory Hierarchies and Matrix Multiplication
+# P2: Memory Hierarchies and Matrix Multiplication
 
 ### Performance programming on uniprocessors requires 
 
@@ -94,7 +94,7 @@ Note:
 
 ---
 
-## P3: Cache Oblivious MatMul and the Roofline Model
+# P3: Cache Oblivious MatMul and the Roofline Model
 
 ### Cache Oblivious MatMul
 
@@ -117,7 +117,7 @@ Note:
     if (n==1) { 
         C00 = A00 * B00 ; 
     } else{ 
-        C00 = RMM (A00 , B00 , n/2) + RMM (A01 , B10 , n/2)
+    	C00 = RMM (A00 , B00 , n/2) + RMM (A01 , B10 , n/2)
     	C01 = RMM (A00 , B01 , n/2) + RMM (A01 , B11 , n/2)
     	C10 = RMM (A10 , B00 , n/2) + RMM (A11 , B10 , n/2)
     	C11 = RMM (A10 , B01 , n/2) + RMM (A11 , B11 , n/2) 
@@ -184,7 +184,7 @@ Note:
 
 ---
 
-## P4: 
+# P4: Shared Memory Parallelism
 
 - Programming shared memory machines
   - May allocate data in large shared region without too many worries about 
@@ -219,7 +219,7 @@ Note:
 
 ---
 
-## P5  Sources of Parallelism and Locality I & II
+# P5  Sources of Parallelism and Locality I & II
 
 ### Outline
 
@@ -355,7 +355,7 @@ Note:
 
 
 
-## P6  Communication-avoiding matrix multiplication
+# P6  Communication-avoiding matrix multiplication
 
 ### Outline
 
@@ -448,7 +448,7 @@ $$
 
 
 
-## P7  An Introduction to CUDA and GPUs
+# P7  An Introduction to CUDA and GPUs
 
 What’s in a CPU?
 
@@ -650,7 +650,7 @@ Shared (within a block) Memory
 
 ---
 
-## P8: Data Parallel Algorithms (aka, tricks with trees)
+# P8: Data Parallel Algorithms (aka, tricks with trees)
 
 ### The Power of Data Parallelism
 
@@ -820,3 +820,976 @@ $$
   - https://doi.org/10.1145/7902.7903 and on Youtube
   - Blelloch the NESL languages and “NESL Revisited paper, 2006
 
+---
+
+# P9 Distributed Memory Machines and Programming
+
+### Outline
+
+- Distributed Memory Architectures
+  - Properties of communication networks
+  - Topologies
+  - Performance models
+- Programming Distributed Memory Machines using Message Passing
+  - Overview of MPI
+  - Basic send/receive use
+  - Non-blocking communication
+  - Collectives
+
+### Design Characteristics of a Network
+
+- Topology (how things are connected)
+  - Crossbar; ring; 2-D, 3-D, higher-D mesh or torus; hypercube; tree; butterfly; perfect shuffle, dragon fly, …
+- Routing algorithm:
+  - Example in 2D torus: all east-west then all north-south (avoids deadlock).
+- Switching strategy:
+  - Circuit switching: full path reserved for entire message, like the telephone.
+  - Packet switching: message broken into separately-routed packets, like the post office, or internet 
+- Flow control (what if there is congestion):
+  - Stall, store data temporarily in buffers, re-route data to other nodes, tell source node to temporarily halt, discard, etc.
+
+### Observations:
+
+- Latencies differ by 1-2 orders across network designs
+- Software/hardware overhead at source/destination dominate 
+- cost (1s-10s usecs)
+- Hardware latency varies with distance (10s-100s nsec per hop) 
+- but is small compared to overheads
+
+![image-20221015194808227](CS267 Note.assets/image-20221015194808227.png)
+
+- Latency has not improved significantly, unlike Moore’ s Law
+
+## Performance Properties of a Network: Bisection Bandwidth
+
+- Bisection bandwidth: bandwidth across smallest cut that divides network into two equal halves
+- Bandwidth across “narrowest” part of the network
+
+![image-20221015194923406](CS267 Note.assets/image-20221015194923406.png)
+
+### Linear and Ring Topologies
+
+- Linear array
+  - Diameter = n-1; average distance ~n/3. 
+  - Bisection bandwidth = 1 (in units of link  bandwidth)
+- Torus or Ring
+  - Diameter = n/2; average distance ~ n/4.
+  - Bisection bandwidth = 2
+
+### Meshes and Tori – used in Hopper
+
+<img src="CS267 Note.assets/image-20221015195102709.png" alt="image-20221015195102709" style="zoom:67%;" />
+
+### Hypercubes
+
+<img src="CS267 Note.assets/image-20221015195119011.png" alt="image-20221015195119011" style="zoom:67%;" />
+
+### Trees
+
+<img src="CS267 Note.assets/image-20221015195156491.png" alt="image-20221015195156491" style="zoom:67%;" />
+
+### Butterflies
+
+<img src="CS267 Note.assets/image-20221015195225739.png" alt="image-20221015195225739" style="zoom:67%;" />
+
+### Dragonflies – used in Edison and Cori
+
+- Motivation: Exploit gap in cost and performance between optical interconnects (which go between cabinets in a machine room) and electrical networks (inside cabinet)
+  - Optical (fiber) more expensive but higher bandwidth when long
+  - Electrical (copper) networks cheaper, faster when short
+- Combine in hierarchy:
+  - Several groups are connected together using all to all links, i.e. each group has at least one link directly to each other group. 
+  - The topology inside each group can be any topology. 
+- Uses a randomized routing algorithm
+- Outcome: programmer can (usually) ignore topology, get good performance
+  - Important in virtualized, dynamic environment
+  - Drawback: variable performance
+
+#### Why randomized routing?
+
+<img src="CS267 Note.assets/image-20221015195509850.png" alt="image-20221015195509850" style="zoom:67%;" />
+
+### Shared Memory Performance Models
+
+- Often called “$\alpha-\beta$ model” and written
+  - $ Time= latency + n/bandwidth=\alpha+n\times\beta$ 
+
+## Programming Distributed Memory Machines with  Message Passing
+
+### MPI Basic Send/Receive
+
+<img src="CS267 Note.assets/image-20221015195858129.png" alt="image-20221015195858129" style="zoom:67%;" />
+
+### MPI Basic (Blocking) Send
+
+```C++
+MPI_Send( A, 10, MPI_DOUBLE, 1, … ) 
+MPI_Recv( B, 20, MPI_DOUBLE, 0, … )
+```
+
+- `MPI_SEND(start, count, datatype, dest, tag, comm)`
+  - The message buffer is described by (start, count, datatype).
+  - The target process is specified by dest, which is the rank of the target process in the communicator specified by comm.
+  - When this function returns, the data has been delivered to the system and the buffer can be reused. The message may not have been received by the target process.
+
+- `MPI_RECV(start, count, datatype, source, tag, comm, status)`
+  - Waits until a matching (both source and tag) message is received from the system, and the buffer can be used
+  - `source` is rank in communicator specified by `comm`, or `MPI_ANY_SOURCE`
+  - `tag` is a tag to be matched or `MPI_ANY_TAG`
+  - receiving fewer than count occurrences of datatype is OK, but receiving more is an error
+  - `status` contains further information (e.g. size of message)
+
+### PI redux: Numerical integration
+
+<img src="CS267 Note.assets/image-20221015200747401.png" alt="image-20221015200747401" style="zoom:67%;" />
+
+```C
+#include "mpi.h”
+#include <math.h>
+#include <stdio.h>
+int main(int argc, char *argv[])
+{
+    int done = 0, n, myid, numprocs, i, rc;
+    double PI25DT = 3.141592653589793238462643;
+    double mypi, pi, h, sum, x, a;
+    MPI_Init(&argc,&argv);
+    MPI_Comm_size(MPI_COMM_WORLD,&numprocs);
+    MPI_Comm_rank(MPI_COMM_WORLD,&myid);
+    while (!done) {
+        if (myid == 0) {
+        printf("Enter the number of intervals: (0 quits) ");
+        scanf("%d",&n);
+    }
+        
+    MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    if (n == 0) break;
+        
+    h = 1.0 / (double) n;
+    sum = 0.0;
+    for (i = myid + 1; i <= n; i += numprocs) {
+    	x = h * ((double)i - 0.5);
+    	sum += 4.0 * sqrt(1.0 - x*x);
+    }
+        
+    mypi = h * sum;
+    MPI_Reduce(&mypi, &pi, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    if (myid == 0)
+        printf("pi is approximately %.16f, Error is .16f\n", 
+               pi, fabs(pi - PI25DT));
+    }
+    
+    MPI_Finalize();
+    return 0;
+}
+```
+
+```shell
+#apt install mpich
+mpicc -o pi pi.c
+mpirun -np 6 ./pi
+```
+
+### Buffers
+
+<img src="CS267 Note.assets/image-20221015211516231.png" alt="image-20221015211516231" style="zoom:67%;" />
+
+- Avoiding Buffering
+  - Avoiding copies uses less memory
+  - May use more or less time
+- <img src="CS267 Note.assets/image-20221015211601935.png" alt="image-20221015211601935" style="zoom: 67%;" />
+- This requires that `MPI_Send` wait on delivery, or  that `MPI_Send` return before transfer is complete, and we wait later
+
+### MPI’s Non-blocking Operations
+
+- Non-blocking operations return (immediately) “request handles” that can be tested and waited on:
+  - `MPI_Request request;`
+  - `MPI_Status status;`
+  - `MPI_Isend(start, count, datatype, dest, tag, comm, &request);`
+  - `MPI_Irecv(start, count, datatype, dest, tag, comm, &request);`
+  - `MPI_Wait(&request, &status);`
+  - (each request must be Waited on)
+- One can also test without waiting:
+  - `MPI_Test(&request, &flag, &status);`
+- Accessing the data buffer without waiting is undefined
+
+
+
+# P10: Advanced MPI and Collective Communication Algorithms 
+
+## SUMMA
+
+<img src="CS267 Note.assets/image-20221016162146626.png" alt="image-20221016162146626" style="zoom:50%;" />
+
+### `MPI_Comm_split`
+
+```C
+int MPI_Comm_split( MPI_Comm comm, 
+                    int color, 
+                    int key, 
+                    MPI_Comm *newcomm)
+```
+
+- MPI’s internal Algorithm:
+
+1. Use `MPI_Allgather` to get the color and key from each process
+2. Count the number of processes with the same color; create a 
+    communicator with that many processes. If this process has 
+    `MPI_UNDEFINED` as the color, create a process with a single 
+    member.
+3. Use key to order the ranks
+  - Color: controls assignment to new communicator
+  - Key: controls rank assignment within new communicator
+
+### How are collectives implemented in MPI?
+
+- Example: `MPI_AllReduce`
+  - All processes must receive the same result vector;
+  - Reduction must be performed in canonical order `m0 + m1 ··· + mp−1` (if the operation is not commutative); 
+  - The same reduction order and bracketing for all elements of the result vector is not strictly required, but should be strived for.
+
+<img src="CS267 Note.assets/image-20221016162500706.png" alt="image-20221016162500706" style="zoom:50%;" />
+
+### AllGather
+
+<img src="CS267 Note.assets/image-20221016162526395.png" alt="image-20221016162526395" style="zoom:50%;" />
+$$
+T_{ring}=\alpha(p-1)+\beta n(p-1)/p\\
+\rightarrow T_{rec-dbl}=\alpha\log(p)+\beta n(p-1)/p
+$$
+
+### The Bruck Algorithm
+
+<img src="CS267 Note.assets/image-20221016162721285.png" alt="image-20221016162721285" style="zoom:50%;" />
+$$
+T_{brock}=\lceil \alpha\log(p) \rceil+\beta n(p-1)/p
+$$
+
+### Nonblocking Collective Communication
+
+Semantic advantages:
+
+- Enable asynchronous progression (and manual) 
+  - Software pipelining
+- Decouple data transfer and synchronization 
+  - Noise resiliency!
+- Allow overlapping communicators 
+  - See also neighborhood collectives
+- Multiple outstanding operations at any time 
+  - Enables pipelining window
+
+<img src="CS267 Note.assets/image-20221016165508437.png" alt="image-20221016165508437" style="zoom:50%;" />
+
+## Hybrid Programming with Threads
+
+### Programming for Multicore
+
+Common options for programming multicore clusters
+
+- All MPI
+
+  - MPI between processes both within a node and across nodes
+
+  - MPI internally uses shared memory to communicate within a 
+    node
+
+- MPI + OpenMP
+
+  - Use OpenMP within a node and MPI across nodes
+
+- MPI + Pthreads
+
+  - Use Pthreads within a node and MPI across nodes 
+
+- The latter two approaches are known as “hybrid programming”
+
+<img src="CS267 Note.assets/image-20221016165636682.png" alt="image-20221016165636682" style="zoom:50%;" />
+
+### MPI’s Four Levels of Thread Safety
+
+- MPI defines four levels of thread safety -- these are commitments the application makes to the MPI
+- `MPI_THREAD_SINGLE`: only one thread exists in the application
+- `MPI_THREAD_FUNNELED`: multithreaded, but only the main thread makes MPI calls (the one that called `MPI_Init_thread`)
+- `MPI_THREAD_SERIALIZED`: multithreaded, but only one thread at a time makes MPI calls
+- `MPI_THREAD_MULTIPLE`: multithreaded and any thread can make MPI calls at any time (with some restrictions to avoid races – see next slide)
+- Thread levels are in increasing order
+  - If an application works in FUNNELED mode, it can work in SERIALIZED
+- MPI defines an alternative to MPI_Init
+  - `MPI_Init_thread(requested, provided)`
+    - Application gives level it needs; MPI implementation gives level it supports
+
+### `MPI_THREAD_FUNNELED `
+
+- All MPI calls are made by the master thread 
+
+  - Outside the OpenMP parallel regions 
+
+  - In OpenMP master regions
+
+  - ```C
+    int main(int argc, char ** argv)
+    {
+        int buf[100], provided;
+        MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, 
+                        &provided);
+        if (provided < MPI_THREAD_FUNNELED)
+        	MPI_Abort(MPI_COMM_WORLD, 1);
+        
+        #pragma omp parallel for
+        for (i = 0; i < 100; i++)
+        	compute(buf[i]);
+        /* Do MPI stuff */
+        MPI_Finalize();
+        return 0;
+    }
+    
+    ```
+
+### `MPI_THREAD_SERIALIZED`
+
+- Only one thread can make MPI calls at a time
+
+  - Protected by OpenMP critical regions
+
+  - ```C
+    int main(int argc, char ** argv)
+    {
+        int buf[100], provided;
+        MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, 
+                        &provided);
+        if (provided < MPI_THREAD_SERIALIZED)
+        	MPI_Abort(MPI_COMM_WORLD, 1);
+        
+        #pragma omp parallel for
+        for (i = 0; i < 100; i++) {
+        	compute(buf[i]);
+        	#pragma omp critical
+        	/* Do MPI stuff */
+        }
+        MPI_Finalize();
+        return 0;
+    }
+    
+    ```
+
+### MPI_THREAD_MULTIPLE 
+
+- Any thread can make MPI calls any time (w/ restrictions)
+
+  - ```C
+    int main(int argc, char ** argv)
+    {
+        int buf[100], provided;
+        MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, 
+                        &provided);
+        if (provided < MPI_THREAD_MULTIPLE)
+        	MPI_Abort(MPI_COMM_WORLD, 1);
+        #pragma omp parallel for
+        for (i = 0; i < 100; i++) {
+            compute(buf[i]);
+            /* Do MPI stuff */
+        }
+        MPI_Finalize();
+        return 0;
+    }
+    
+    ```
+
+### Threads and MPI
+
+- An implementation is not required to support levels higher than `MPI_THREAD_SINGLE;` that is, an implementation is not required to be thread safe
+- A fully thread-safe implementation will support `MPI_THREAD_MULTIPLE`
+- A program that calls `MPI_Init (instead of MPI_Init_thread)` should assume that only `MPI_THREAD_SINGLE` is supported
+- A threaded MPI program that does not call `MPI_Init_thread` is an incorrect program (common user error we see)
+- **The user has to make sure that one thread is not using an object while another thread is freeing it** 
+  - This is an ordering issue; the object might get freed before it is used
+
+### One-sided Communication
+
+<img src="CS267 Note.assets/image-20221016170447591.png" alt="image-20221016170447591" style="zoom:50%;" />
+
+### One-sided Communication Example
+
+<img src="CS267 Note.assets/image-20221016170509238.png" alt="image-20221016170509238" style="zoom:50%;" />
+
+### Creating Public Memory
+
+- Any memory used by a process is, by default, only locally accessible
+  - `X = malloc(100);`
+- Once the memory is allocated, the user has to make an explicit MPI call to declare a memory region as remotely accessible
+  - MPI terminology for remotely accessible memory is a “window”
+  - A group of processes collectively create a “window”
+- Once a memory region is declared as remotely accessible, all processes in the window can read/write data to this memory without explicitly synchronizing with the target process
+
+### Window creation models
+
+- Four models exist
+- `MPI_WIN_CREATE`
+  - You already have an allocated buffer that you would like to make remotely accessible
+
+- `MPI_WIN_ALLOCATE`
+  - You want to create a buffer and directly make it remotely accessible
+- `MPI_WIN_CREATE_DYNAMIC`
+  - You don’t have a buffer yet, but will have one in the future
+  - You may want to dynamically add/remove buffers to/from the window
+- `MPI_WIN_ALLOCATE_SHARED`
+  - You want multiple processes on the same node share a buffer
+
+### `MPI_WIN_ALLOCATE`
+
+```C
+int MPI_Win_allocate(MPI_Aint size, int disp_unit,
+	MPI_Info info, MPI_Comm comm, void *baseptr,
+	MPI_Win *win)
+```
+
+- Arguments:
+- size - size of local data in bytes (nonnegative integer)
+- disp_unit - local unit size for displacements, in bytes (positive integer)
+- info - info argument (handle)
+- comm - communicator (handle)
+- baseptr - pointer to exposed local data
+- win - window (handle)
+
+
+
+```C
+int MPI_Win_create_dynamic(MPI_Info info, MPI_Comm comm,
+	MPI_Win *win)
+```
+
+- Create an RMA window, to which data can **later** be attached
+  - Only data exposed in a window can be accessed with RMA ops
+- Initially “empty”
+  - Application can dynamically attach/detach memory to this window by calling `MPI_Win_attach/detach`
+  - Application can access data on this window only after a memory region has been attached
+- Window origin is `MPI_BOTTOM`
+  - Displacements are segment addresses relative to `MPI_BOTTOM`
+  - Must tell others the displacement after calling attach
+
+```C
+int main(int argc, char ** argv)
+{
+    int *a; MPI_Win win;
+    MPI_Init(&argc, &argv);
+    MPI_Win_create_dynamic(MPI_INFO_NULL, MPI_COMM_WORLD, &win);
+    /* create private memory */
+    a = (int *) malloc(1000 * sizeof(int));
+    /* use private memory like you normally would */
+    a[0] = 1; a[1] = 2;
+    /* locally declare memory as remotely accessible */
+    MPI_Win_attach(win, a, 1000*sizeof(int));
+    /* Array 'a' is now accessible from all processes */
+    /* undeclare remotely accessible memory */
+    MPI_Win_detach(win, a); free(a);
+    MPI_Win_free(&win);
+    MPI_Finalize(); return 0;
+}
+```
+
+### Data movement: Put
+
+<img src="CS267 Note.assets/image-20221016171045349.png" alt="image-20221016171045349" style="zoom:50%;" />
+
+<img src="CS267 Note.assets/image-20221016171057187.png" alt="image-20221016171057187" style="zoom:50%;" />
+
+### RMA Synchronization Models
+
+- RMA data access model
+  - When is a process allowed to read/write remotely accessible memory?
+  - When is data written by process X is available for process Y to read?
+  - RMA synchronization models define these semantics
+- Three synchronization models provided by MPI:
+  - Fence (active target)
+  - Post-start-complete-wait (generalized active target)
+  - Lock/Unlock (passive target)
+- Data accesses occur within “epochs”
+  - Access epochs: contain a set of operations issued by an origin process
+  - Exposure epochs: enable remote processes to update a target’s window
+  - Epochs define ordering and completion semantics
+  - Synchronization models provide mechanisms for establishing epochs
+    - E.g., starting, ending, and synchronizing epochs
+
+<img src="CS267 Note.assets/image-20221016171226217.png" alt="image-20221016171226217" style="zoom:50%;" />
+
+---
+
+
+
+# 11: UPC++: Partitioned Global Address Space Languages
+
+## Some motivating applications
+
+- Many applications involve asynchronous updates to irregular data structures
+  - Adaptive meshes
+  - Sparse matrices 
+  - Hash tables and histograms
+  - Graph analytics
+  - Dynamic work queues
+- Irregular and unpredictable data movement:
+  - Space: Pattern across processors
+  - Time: When data moves
+  - Volume: Size of data
+
+## Some motivating system trends
+
+### The first exascale systems will appear in 2021
+
+- Cores per node is growing
+- Cores are getting simpler (including GPU cores)
+- Memory per core is dropping
+- Latency is not improving
+
+### Need to reduce communication costs in software
+
+- Overlap communication to hide latency
+- Reduce memory using smaller, more frequent messages
+- Minimize software overhead 
+- Use simple messaging protocols (RDMA)
+
+## Parallel Machines and Programming
+
+![image-20221019212331650](CS267 Note.assets/image-20221019212331650.png)
+
+- Memory access time depends on **size** and whether local vs. remote
+- Key PGAS  "feature": **never  cache remote data**
+
+### Advantages and disadvantages of each
+
+- Shared memory / OpenMP
+  - +**Ease**: Easier to parallelize existing serial code
+  - Correctness: Race conditions
+  - Scalability: No locality control; cache coherence doesn’t scale
+  - Performance: False sharing, lack of parallelism, etc.
+- Message Passing / two-sided MPI
+  - Ease: More work up front to partition data
+  - +**Correctness**: Harder to create races (although deadlocks can still be a problem)
+  - +**Scalability**: Effectively unlimited
+  - +**Performance**: More transparent, but messages are expensive (need to pack/unpack)
+
+### PGAS = Partitioned Global Address Space
+
+- **Global address space**: thread may directly read/write remote data 
+  - Convenience of shared memory
+- **Partitioned**: data is designated as local or global
+  - Locality and scalability of message passing
+
+<img src="CS267 Note.assets/image-20221019212636773.png" alt="image-20221019212636773" style="zoom:50%;" />
+
+- **Shared mem: Physically Partition + Logically Continue**
+- Need a way to name remote memory (UPC syntax) 
+  - Global pointers: `shared int * p = upc_malloc(4); `
+  - Distributed arrays: `shared int a [12];`
+- Directly read/write remote memory; partitioned for locality 
+  - One-sided communication underneath (UPC syntax): 
+  - Put: `a[i] = … ; *p = ...; upc_mem_put(..) `
+  - Get: `... = a[i]...; ... = *p; upc_mem_get(...)`
+
+### Global vs raw pointers and affinity
+
+- The affinity **identifies** the process that created the object
+- Global pointer carries both an address and the affinity for the data
+- Raw C++ pointers can be used on a process to refer to objects in the global address space that have affinity to that process
+  - <img src="CS267 Note.assets/image-20221019213054350.png" alt="image-20221019213054350" style="zoom:50%;" />
+  - P0: `g->val` == `l->next->val`
+
+### What does UPC++ offer?
+
+- Asynchronous behavior
+  - RMA: Remote Memory Access
+    - Get/put to a remote location in another address space
+    - Low overhead, zero-copy, one-sided communication. 
+  - RPC: Remote Procedure Call: 
+    - Moves computation to the data
+- Design principles for performance
+  -  All communication is **syntactically** **explicit**
+  - All communication is **asynchronous**: futures and promises
+  - Scalable data structures that avoid **unnecessary** **replication**
+
+## Example: Monte Carlo Pi Calculation
+
+- Estimate Pi by throwing darts at a unit square
+- Calculate percentage that fall in the unit circle
+  - Area of square = r2 = 1
+  - Area of circle quadrant = $1/4\times\pi r^2=\pi/4$
+- Randomly throw darts at x,y positions
+- `If x2 + y2 < 1`, then point is inside circle
+- Compute ratio:
+  - points inside / # points total
+  - $\pi$ = 4*ratio
+
+### Independent estimates of pi:
+
+<img src="CS267 Note.assets/image-20221019213801831.png" alt="image-20221019213801831" style="zoom:50%;" />
+
+<img src="CS267 Note.assets/image-20221019213812686.png" alt="image-20221019213812686" style="zoom:50%;" />
+
+### Private vs. Shared Memory in UPC++
+
+<img src="CS267 Note.assets/image-20221019213907099.png" alt="image-20221019213907099" style="zoom:50%;" />
+
+- `global_ptr gptr = new_(rank_me());`
+
+- To write an interesting program, we need to have global  pointers refer to remote data 
+- One approach is to broadcast the pointer
+- <img src="CS267 Note.assets/image-20221019214009824.png" alt="image-20221019214009824" style="zoom:50%;" />
+
+### Asynchronous remote operations
+
+- Asynchronous execution used to hide remote latency
+- Asynchronous get: start reading, but how to tell if you’re done?
+  - Put the results into a special “box” called a future
+  - <img src="CS267 Note.assets/image-20221019214144740.png" alt="image-20221019214144740" style="zoom:50%;" />
+
+### UPC++ Synchronization
+
+- UPC++ has two basic forms of barriers:
+
+   1) Synchronous Barrier: block until all other threads arrive (usual)
+      `barrier();`
+   1) Asynchronous barriers
+      ```C++
+      future<> f =
+        barrier_async(); // this thread is ready for barrier
+        // do computation unrelated to barrier
+        wait(f); // wait for others to be ready
+      ```
+
+- Reminder: slides elide the `upcxx::` that precedes these
+
+  
+
+### Pi in UPC++: Shared Memory Style
+
+![image-20221019214658581](CS267 Note.assets/image-20221019214658581.png)
+
+- Race condition:  `int old_hits = rget(hits).wait();`
+
+### Downcasting global pointers
+
+- If a process has direct load/store access to the memory referenced by a global 
+  pointer, it can downcast the global pointer into a raw pointer with local()
+```C++
+global_ptr<double> grid_pptr;
+double *grid;
+
+void make_grid(size_t N) {
+	grid_gptr = new_array<double>(N);
+	grid = grid_gptr.local();//Downcasting 
+}
+```
+
+- Downcasting can be used to optimize for co-located processes 
+  that share physical memory
+
+### Atomics in UPC++ 
+
+- Atomics are indivisible read-modify-write operations 
+- As if you put a lock around each operation, but may have  hardware support (e.g., within the network interface)
+
+![image-20221019215028713](CS267 Note.assets/image-20221019215028713.png)
+
+### Pi in UPC++: Data Parallel Style w/ Collectives
+
+- The previous version of Pi works, but is not scalable:
+  - Updates are serialized on rank 0, ranks block on updates
+- Use a reduction for better scalability:
+
+![image-20221019215114556](CS267 Note.assets/image-20221019215114556.png)
+
+```C++
+#include <iostream>
+#include <random>
+#include <upcxx/upcxx.hpp>
+default_random_engine generator;
+uniform_real_distribution<> dist(0.0, 1.0);
+using namespace upcxx
+int hit() {
+    double x = dist(generator);
+    double y = dist(generator);
+    if (x*x + y*y <= 1.0) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+int main(int argc, char **argv) {
+    init();
+    int trials = atoi(argv[1]);
+    int my_trials = (trials+rank_me())/rank_n();
+    global_ptr<int> hits = broadcast(new_<int>(0), 0)).wait();
+    generator.seed(rank_me()*17);
+    
+    int my_hits = 0;
+    for (int i=0; i < my_trials; i++) 
+    	my_hits += hit();
+    
+    int hits = reduce_all(my_hits, op_fast_add).wait();
+    // barrier();
+    if (rank_me() == 0)
+    	cout << "PI: " << 4.0*hits/trials;
+    finalize();
+}
+
+
+```
+
+## Remote procedure call (RPC)
+
+- Execute a function on another process, sending arguments and returning an optional result 
+
+  - 1.Initiator injects the RPC to the target process 
+
+  - 2.Target process executes fn(arg1, arg2) at some later time determined at the target
+
+  - 3.Result becomes available to the initiator via the future
+
+- Many RPCs can be active simultaneously, hiding latency
+- <img src="CS267 Note.assets/image-20221019215925279.png" alt="image-20221019215925279" style="zoom:50%;" />
+
+### Pi in UPC++: RPC
+
+<img src="CS267 Note.assets/image-20221019220033951.png" alt="image-20221019220033951"  />
+
+### Chaining callbacks
+
+![image-20221019220102259](CS267 Note.assets/image-20221019220102259.png)
+
+### Conjoining futures
+
+![image-20221019220122775](CS267 Note.assets/image-20221019220122775.png)
+
+### Distributed objects
+
+- A distributed object is an object that is partitioned over a set of processes
+  - `dist_object<T>(T value, team &team = world());`
+- The processes share a universal name for the object, but each has its own local value
+- Similar in concept to a co-array, but with advantages
+  - No communication to set up or **tear down**
+  - Scalable metadata representation
+  - **Does not require a symmetric heap**
+  - Can be constructed over teams
+
+### Pi with a distributed object
+
+- A distributed object can be used to store the results from each process
+- <img src="CS267 Note.assets/image-20221019220314277.png" alt="image-20221019220314277" style="zoom:50%;" />
+
+### Distributed hash table (DHT)
+
+- Distributed analog of std::unordered_map
+  - Supports insertion and lookup
+  - We will assume the key and value types are string
+  - Represented as a collection of individual unordered maps across processes
+  - We use RPC to move hash-table operations to the owner
+
+<img src="CS267 Note.assets/image-20221019220402242.png" alt="image-20221019220402242" style="zoom:50%;" />
+
+### DHT data representation
+
+- A distributed object represents the directory of unordered maps
+
+- ```C++
+  class DistrMap {
+  	using dobj_map_t = dist_object<unordered_map<string, string>>;
+      // Construct empty map
+      dobj_map_t local_map{{}};
+      
+      //Computes owner for the given key
+      int get_target_rank(const string &key) {
+      	return std::hash<string>{}(key) % rank_n();
+      } 
+  };
+  ```
+
+### DHT insertion
+
+- Insertion initiates an RPC to the owner and returns a future that represents  completion of the insert
+
+- ![image-20221019220601788](CS267 Note.assets/image-20221019220601788.png)
+
+- ```C++
+  future<> insert(const string &key, const string &val) {
+      return rpc( get_target_rank(key),
+  			[](dobj_map_t &lmap, const string &key, const string &val) 
+  				{ (*lmap)[key] = val; }, 
+  			local_map, key, val);
+  }
+  ```
+
+### RPC and progress
+
+- Review: high-level overview of an RPC's execution
+  - 1.Initiator injects the RPC to the target process 
+  - 2.Target process executes fn(arg1, arg2) at some later time determined at target
+  - 3.Result becomes available to the initiator via the future
+- **Progress** is what ensures that the RPC is eventually executed at the target
+
+![image-20221019220955042](CS267 Note.assets/image-20221019220955042.png)
+
+### Progress
+
+- UPC++ does not spawn hidden threads to advance its internal state or track asynchronous communication
+- This design decision keeps the runtime lightweight and simplifies synchronization
+  - RPCs are run in series on the main thread at the target process, avoiding the need for explicit synchronization
+- The runtime relies on the application to invoke a progress function to process incoming RPCs and invoke callbacks
+- Two levels of progress
+  - Internal: advances UPC++ internal state but no notification
+  - User: also notifies the application
+  - Readying futures, running callbacks, invoking inbound RPCs
+
+### Serialization
+
+![image-20221019221124937](CS267 Note.assets/image-20221019221124937.png)
+
+### Views
+
+- UPC++ views permit optimized handling of collections in RPCs, without making unnecessary copies
+  - ` view<T>`: non-owning sequence of elements
+- When deserialized by an RPC, the view elements can be accessed directly from the internal network buffer, rather than constructing a container at the target
+
+![image-20221019221234188](CS267 Note.assets/image-20221019221234188.png)
+
+### Shared memory hierarchy and `local_team`
+
+- Memory systems on supercomputers are hierarchical
+  - Some process pairs are “closer” than others
+  - Ex: cabinet > switch > node > NUMA domain > socket > core
+- Traditional PGAS model is a “flat” two-level hierarchy
+  - “same process” vs “everything else”
+- UPC++ adds an intermediate hierarchy level
+  - local_team() – a team corresponding to a physical node
+  - These processes share a physical memory domain
+    - **Shared** segments are CPU load/store accessible across the same `local_team`
+- <img src="CS267 Note.assets/image-20221019221343611.png" alt="image-20221019221343611" style="zoom:50%;" />
+
+### Downcasting and shared-memory bypass
+
+- Earlier we covered downcasting global pointers
+  - Converting `global_ptr<T> `from this process to raw C++ `T*`
+  - Also works for `global_ptr<T>` from any process in `local_team()`
+
+![image-20221019221459042](CS267 Note.assets/image-20221019221459042.png)
+
+### Optimizing for shared memory in many-core
+
+- `local_team()` allows optimizing co-located processes for physically 
+- shared memory in two major ways:
+- Memory scalability
+  - Need only one copy per node for replicated data
+  - E.g. Cori KNL has 272 hardware threads/node
+- Load/store bypass – avoid explicit communication overhead for RMA on local shared memory
+  - Downcast `global_ptr `to raw C++ pointer
+  - Avoid extra data copies and communication overheads
+
+---
+
+
+
+# 12: Special Lecture
+
+## 12a: Parallel Algorithms for De Novo Genome Assembly
+
+
+
+
+
+## 12b: Communication-Avoiding Graph Neural Networks
+
+
+
+
+
+## 12c: Distributed Computing with Ray and NumS
+
+
+
+
+
+# 13: Parallel Matrix Multiply
+
+
+
+
+
+# 14: Dense Linear Algebra
+
+
+
+
+
+# 15: Structured Grids
+
+
+
+
+
+# 16: Machine Learning Part 1 
+
+## (Supervised Learning)
+
+
+
+
+
+# 17: Machine Learning Part 2 
+
+## (Unsupervised and semi-supervised learning)
+
+
+
+
+
+# 18: Sparse-Matrix-Vector-Multiplication and Iterative Solvers
+
+
+
+
+
+# 19: Fast Fourier Transform
+
+
+
+
+
+# 20: Graph Algorithms
+
+
+
+
+
+# 21: Cloud Computing and HPC
+
+
+
+
+
+# 22a: Graph Partitioning
+
+
+
+
+
+# 22b: Load Balancing with Work Stealing
+
+
+
+
+
+# 23: Hierarchical Methods for the N-Body Problem
+
+
+
+
+
+# 24: Sorting and Searching
+
+
+
+
+
+# 25: Big Bang, Big Data, Big Iron
+
+
+
+# 26: Computational Biology
