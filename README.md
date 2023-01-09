@@ -1,5 +1,7 @@
 # CS267_note
-Note of BK CS267
+Note of UC Berkeley CS267
+
+Official Website: [AI-Sys Sp22 (ucbrise.github.io)](https://ucbrise.github.io/cs294-ai-sys-sp22/)
 
 - [x] Lecture 1: Introduction & Overview
 - [x] Lecture 2: Memory Hierarchies and Matrix Multiplication
@@ -13,15 +15,15 @@ Note of BK CS267
 - [x] Lecture 9: Distributed Memory Machines and Programming
 - [x] Lecture 10: Advanced **MPI** and Collective Communication Algorithms ->AIsys 4,5
 - [x] Lecture 11: UPC++: Partitioned Global Address Space Languages
-- [ ] Lecture 12a: Parallel Algorithms for De Novo Genome Assembly
-- [ ] Lecture 12b: Communication-Avoiding Graph Neural Networks
-- [ ] Lecture 12c: Distributed Computing with Ray and NumS
-- [ ] Lecture 13: Parallel Matrix Multiply
-- [ ] Lecture 14: Dense Linear Algebra
-- [ ] Lecture 15: Structured Grids
-- [ ] Lecture 16: Machine Learning Part 1 (Supervised Learning)
-- [ ] Lecture 17: Machine Learning Part 2 (Unsupervised and semi-supervised learning)
-- [ ] Lecture 18: Sparse-Matrix-Vector-Multiplication and Iterative Solvers
+- [x] Lecture 12a: Parallel Algorithms for De Novo Genome Assembly
+- [x] Lecture 12b: Communication-Avoiding Graph Neural Networks
+- [x] Lecture 12c: Distributed Computing with Ray and NumS
+- [x] Lecture 13: Parallel Matrix Multiply
+- [x] Lecture 14: Dense Linear Algebra
+- [x] Lecture 15: Structured Grids
+- [x] Lecture 16: Machine Learning Part 1 (Supervised Learning)
+- [x] Lecture 17: Machine Learning Part 2 (Unsupervised and semi-supervised learning)
+- [x] Lecture 18: Sparse-Matrix-Vector-Multiplication and Iterative Solvers
 - [ ] Lecture 19: Fast Fourier Transform
 - [ ] Lecture 20: Graph Algorithms 
 - [ ] Lecture 21: Cloud Computing and HPC

@@ -206,7 +206,7 @@ Note:
     - Non-blocking writes, read prefetching, code motion…
     - Avoid races or use machine-specific fences carefully
 
-![image-20220707145549190](CS267 Note.assets/image-20220707145549190.png)
+![    ](CS267 Note.assets/image-20220707145549190.png)
 
 ### Original Serial pi program with 100000000 steps
 
@@ -974,7 +974,7 @@ int main(int argc, char *argv[])
     mypi = h * sum;
     MPI_Reduce(&mypi, &pi, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     if (myid == 0)
-        printf("pi is approximately %.16f, Error is .16f\n", 
+        printf("pi is approximately %.16f, Error is %.16f\n", 
                pi, fabs(pi - PI25DT));
     }
     
@@ -1696,11 +1696,131 @@ int main(int argc, char **argv) {
 
 ## 12b: Communication-Avoiding Graph Neural Networks
 
+### What are graphs?
 
+<img src="CS267 Note.assets/image-20221028142256683.png" alt="image-20221028142256683" style="zoom:50%;" />
+
+- Stores connections (edges) between entities (vertices/nodes)
+
+### Why not use CNNs?
+
+- <img src="CS267 Note.assets/image-20221028142420131.png" alt="image-20221028142420131" style="zoom:50%;" />
+- Why not use CNNs?
+
+### GNN basics
+
+<img src="CS267 Note.assets/image-20221028142456645.png" alt="image-20221028142456645" style="zoom:50%;" />
+
+### GNN training basics
+
+1. Initialize feature vectors in layer 0
+2. Sum neighbors’ vectors for each vertex
+3. Apply weight to vector sums
+
+<img src="CS267 Note.assets/image-20221028142529912.png" alt="image-20221028142529912" style="zoom:50%;" />
+
+### GNN issues
+
+- GNN models are huge: $O(nfl)$
+  - $n$ : number of vertices
+  - $f$ : length of feature vector
+  - $L$ : number of layers
+- Need to distribute GNN training + inference
+
+### Why not use mini-batch SGD?
+
+![image-20221028142756631](CS267 Note.assets/image-20221028142756631.png)
+
+- Layered dependencies -> space issue persists 
+- Focus on full-batch gradient descent
+
+### How do we distribute GNN training?
+
+- Formulate GNN training with sparse-dense matrix multiplication operations
+  - Both forward and back propagation
+- Distribute with distributed sparse-dense matrix multiplication algorithms
+  - Focus on node classification, but methods are general
+
+### GNN training as sparse-dense matrix multiplication
+
+![image-20221028143802113](CS267 Note.assets/image-20221028143802113.png)
+
+#### Forward Propagation:
+
+- $\mathbf{Z}^l \leftarrow \mathbf{A}^T\mathbf{H}^{l-1}\mathbf{W}^l$  <- SpMM, DGEMM
+- $\mathbf{H}^l \leftarrow \sigma(\mathbf{Z}^l)$   <- In paper
+
+#### Backward Propagation:
+
+- $\mathbf{G}^{l-1} \leftarrow \mathbf{A G}^l\left(\mathbf{W}^l\right)^{T} \odot \sigma^{\prime}\left(\mathbf{Z}^{l-1}\right) $  <- SpMM, DGEMM
+- $\mathbf{Y}^{l-1} \leftarrow\left(\mathbf{H}^{l-1}\right)^{T} \mathbf{A} \mathbf{G}^l$  <- DGEMM
+
+### Bottleneck of GNN training
+
+<img src="CS267 Note.assets/image-20221028145013711.png" alt="image-20221028145013711" style="zoom:50%;" />
+
+- SpMM >>> DGEMM
+
+### GNN training communication analysis
+
+![image-20221028145125903](CS267 Note.assets/image-20221028145125903.png)
+
+- $nnz(\mathbf{A})$ is the number of edges
+- $c$ is the replication factor for 1.5D ($c=1$ is 1D, $c=P^{1/3}$, is 3D)
+
+### GNN Training with 2D/3D Matrix Multiplication
+
+![image-20221028145627338](CS267 Note.assets/image-20221028145627338.png)
+
+- Other algorithms evaluated in practice (with 6GPUs/node)
+- Communication scales with $P$, consistent with analysis
+- Computation scales less well à explained in paper
 
 
 
 ## 12c: Distributed Computing with Ray and NumS
+
+### What is Ray?
+
+- Ray provides a **Task parallel** API and **actor** API built on **dynamic task graphs**
+- <img src="CS267 Note.assets/image-20221028145810418.png" alt="image-20221028145810418" style="zoom:50%;" />
+
+### Ray Architecture
+
+<img src="CS267 Note.assets/image-20221028161455510.png" alt="image-20221028161455510" style="zoom:50%;" />
+
+### The Ray API
+
+<img src="CS267 Note.assets/image-20221028212503508.png" alt="image-20221028212503508" style="zoom:50%;" />
+
+<img src="CS267 Note.assets/image-20221028212519284.png" alt="image-20221028212519284" style="zoom:50%;" />
+
+- Actor Handles
+
+<img src="CS267 Note.assets/image-20221028212552289.png" alt="image-20221028212552289" style="zoom:50%;" />
+
+#### NumS: 
+
+#### The Problem
+
+- NumS aims to make **terabyte-scale data modeling easier** for the **Python** scientific computing community.
+- We have an abundance of very fast compute devices and libraries to manage parallelism among these devices.
+- However, existing libraries expect the Python scientific computing community to learn advanced parallel computing concepts and algorithms to make use of these devices, an uncommon skill among Python users.
+- What can be done to make numerical computing at these scales accessible to Python programmers?
+
+#### NumS Design
+
+<img src="CS267 Note.assets/image-20221028212914545.png" alt="image-20221028212914545" style="zoom:50%;" />
+
+#### Execution on Ray: RPC Returns
+
+![image-20221028212928451](CS267 Note.assets/image-20221028212928451.png)
+
+- Objects are held in the store so long as  a reference to the object exists in the  application.
+
+#### Array Access Dependency Resolution
+
+![image-20221028213818150](CS267 Note.assets/image-20221028213818150.png)
 
 
 
